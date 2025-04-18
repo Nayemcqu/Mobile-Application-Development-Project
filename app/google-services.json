@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "618808351610",
+    "project_id": "cqu-genai-budget-app",
+    "storage_bucket": "cqu-genai-budget-app.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:618808351610:android:ba29cd7279be25c3e8d4c3",
+        "android_client_info": {
+          "package_name": "com.cqu.genaiexpensetracker"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBeVBK9zQ3FmEILME54kPxASbmN2Gq7aOc"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
