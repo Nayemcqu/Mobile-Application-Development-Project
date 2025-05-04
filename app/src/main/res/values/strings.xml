@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- App Information -->
+    <string name="app_name">GenAIExpenseTracker</string>
+    <string name="genai_expense_tracker">GenAI Expense Tracker</string>
+
+    <!-- Auth Screens: Common -->
+    <string name="email">Email</string>
+    <string name="password">Password</string>
+    <string name="name">Name</string>
+    <string name="sign_in">Sign In</string>
+    <string name="sign_up">Sign Up</string>
+    <string name="example_gmail_com">example@gmail.com</string>
+    <string name="type_your_email">Type your email</string>
+    <string name="type_your_password">Type your password</string>
+    <string name="type_your_name">Type your name</string>
+    <string name="confirm_password">Confirm Password</string>
+    <string name="remember_me">Remember Me</string>
+    <string name="forgot_your_password">Forgot your password?</string>
+    <string name="IF_No_Acc">Don’t have an account?</string>
+    <string name="If_Account_Have">Already Have an Account?</string>
+    <string name="or_login_with">Or Login With</string>
+    <string name="google">Google</string>
+    <string name="facebook">Facebook</string>
+    <string name="toggle_pass_visibility">Toggle password visibility</string>
+    <string name="Password_Visibility">Password visibility toggle</string>
+
+    <!-- Forgot Password -->
+    <string name="forgot_password">Forgot Password</string>
+    <string name="forgot_password_details">Provide your registered email to reset your password.</string>
+    <string name="next_btn">Continue</string>
+
+    <!-- Set New Password -->
+    <string name="create_new_password">Reset your Password</string>
+    <string name="new_password_details">Your identity has been verified! Set your new password</string>
+    <string name="new_password">New Password</string>
+    <string name="update_btn">Update</string>
+    <string name="password_match">Passwords match</string>
+    <string name="update_password">Password Updated</string>
+    <string name="success_message">Your Password has been updated successfully!</string>
+
+    <!-- Welcome Screen -->
+    <string name="Main_Topic">Welcome To GenAI Expense\nTracker App</string>
+    <string name="welcome_sub_tagline">Smart budgeting made simple.\nTrack expenses,\nplan better with AI.</string>
+
+    <!-- Errors & Validation -->
+    <string name="error_email_required">Email is required.</string>
+    <string name="error_password_required">Password is required.</string>
+    <string name="error_email_invalid">Please enter a valid email address.</string>
+    <string name="error_login_title">Incorrect login details</string>
+    <string name="error_login_description">The email address or password combination you have entered is incorrect. Please try again or reset your password.</string>
+    <string name="error_google_login">Google sign in failed</string>
+    <string name="error_google_failed">Google Authentication Failed</string>
+    <string name="error_facebook_cancelled">Facebook sign in canceled</string>
+    <string name="error_facebook_failed">Facebook Authentication Failed</string>
+
+    <!-- Dialog / Messages -->
+    <string name="dialog_success">Welcome aboard! Your account has been created successfully.</string>
+
+    <!-- Facebook SDK -->
+    <string name="facebook_app_id">610721935344253</string>
+    <string name="facebook_client_token">848d12034dac0e0465beffbe94f1925d</string>
+    <string name="fb_login_protocol_scheme">fb610721935344253</string>
+
+    <!-- Google Web Client -->
+    <string name="default_web_client_id">618808351610-pklfmj8sa19i5jnime7t4tmlcgc20ptd.apps.googleusercontent.com</string>
+</resources>
