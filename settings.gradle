@@ -19,5 +19,10 @@ dependencyResolutionManagement {
     }
 }
 
+<<<<<<< HEAD
+=======
+
+
+>>>>>>> origin/feature/authentication-module
 rootProject.name = "GenAIExpenseTracker"
 include ':app'

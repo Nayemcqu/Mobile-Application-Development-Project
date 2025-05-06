@@ -1,5 +1,35 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+<<<<<<< HEAD
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
 </resources>
+=======
+
+    <!-- ======= Base Colors ======= -->
+    <color name="black">#FF000000</color> <!-- Standard black -->
+    <color name="white">#FFFFFFFF</color> <!-- Pure white -->
+    <color name="grey">#808080</color> <!-- Medium grey -->
+    <color name="grey_light">#D3D3D3</color> <!-- Light grey -->
+    <color name="hint_gray">#9E9E9E</color> <!-- Hint text gray -->
+    <color name="red">#FF0000</color> <!-- Standard red -->
+    <color name="dark_red">#E40000</color> <!-- Darker red for error emphasis -->
+    <color name="green">#068251</color> <!-- Success green -->
+    <color name="blue">#0061B7</color> <!-- Action blue -->
+    <color name="error_red">#FF0000</color> <!-- Error color (duplicate of red) -->
+
+    <!-- ======= App Theme Colors ======= -->
+    <color name="app_theme">#009dff</color> <!-- Primary brand blue -->
+    <color name="app_theme_light">#f6fbff</color> <!-- Light variant of app theme -->
+
+    <!-- ======= Custom UI Colors ======= -->
+    <color name="edit_text_border">#03A9f4</color> <!-- Border for input fields -->
+    <color name="edit_text_background">#fbf6ff</color> <!-- Input field background -->
+
+    <!-- ======= Design Tokens ======= -->
+    <color name="my_primary">#5E35B1</color> <!-- Primary purple (custom usage) -->
+    <color name="my_secondary">#673AB7</color> <!-- Secondary accent purple -->
+    <color name="light_white">#F5F8FC</color> <!-- Slightly tinted white background -->
+
+</resources>
+>>>>>>> origin/feature/authentication-module
