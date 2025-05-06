@@ -64,4 +64,5 @@
 
     <!-- Google Web Client -->
     <string name="default_web_client_id">618808351610-pklfmj8sa19i5jnime7t4tmlcgc20ptd.apps.googleusercontent.com</string>
+    <string name="get_started">Get Started</string>
 </resources>
