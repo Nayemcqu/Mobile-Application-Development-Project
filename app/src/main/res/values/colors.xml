@@ -1,10 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-<<<<<<< HEAD
-    <color name="black">#FF000000</color>
-    <color name="white">#FFFFFFFF</color>
-</resources>
-=======
 
     <!-- ======= Base Colors ======= -->
     <color name="black">#FF000000</color> <!-- Standard black -->
@@ -17,6 +12,7 @@
     <color name="green">#068251</color> <!-- Success green -->
     <color name="blue">#0061B7</color> <!-- Action blue -->
     <color name="error_red">#FF0000</color> <!-- Error color (duplicate of red) -->
+    <color name="yellow">#BA4925</color>
 
     <!-- ======= App Theme Colors ======= -->
     <color name="app_theme">#009dff</color> <!-- Primary brand blue -->
@@ -32,4 +28,8 @@
     <color name="light_white">#F5F8FC</color> <!-- Slightly tinted white background -->
 
 </resources>
->>>>>>> origin/feature/authentication-module
+
+
+
+
+

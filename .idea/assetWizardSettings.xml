@@ -3,6 +3,14 @@
   <component name="WizardSettings">
     <option name="children">
       <map>
+<<<<<<< HEAD
+=======
+        <entry key="imageWizard">
+          <value>
+            <PersistentState />
+          </value>
+        </entry>
+>>>>>>> origin/feature-nav-bar
         <entry key="vectorWizard">
           <value>
             <PersistentState>
@@ -18,7 +26,11 @@
                                 <PersistentState>
                                   <option name="values">
                                     <map>
+<<<<<<< HEAD
                                       <entry key="url" value="jar:file:/C:/Users/kawpe/AppData/Local/Programs/Android%20Studio/plugins/android/lib/android.jar!/images/material/icons/materialicons/check_circle_outline/baseline_check_circle_outline_24.xml" />
+=======
+                                      <entry key="url" value="file:/$USER_HOME$/AppData/Local/Android/Sdk/icons/material/materialicons/account_circle/baseline_account_circle_24.xml" />
+>>>>>>> origin/feature-nav-bar
                                     </map>
                                   </option>
                                 </PersistentState>
@@ -28,9 +40,15 @@
                         </option>
                         <option name="values">
                           <map>
+<<<<<<< HEAD
                             <entry key="color" value="0d9813" />
                             <entry key="outputName" value="success_updated_password" />
                             <entry key="sourceFile" value="C:\Users\kawpe\AndroidStudioProjects\GenAIExpenseTracker" />
+=======
+                            <entry key="opacityPercent" value="90" />
+                            <entry key="outputName" value="baseline_account_circle_24" />
+                            <entry key="sourceFile" value="C:\Users\NAYEM\AndroidStudioProjects\Mobile-Application-Development-Project" />
+>>>>>>> origin/feature-nav-bar
                           </map>
                         </option>
                       </PersistentState>

@@ -36,11 +36,10 @@ dependencies {
     implementation libs.activity
     implementation libs.constraintlayout
     implementation libs.firebase.firestore
-<<<<<<< HEAD
+    implementation libs.androidx.appcompat
     testImplementation libs.junit
     androidTestImplementation libs.ext.junit
     androidTestImplementation libs.espresso.core
-=======
     implementation libs.firebase.auth
     implementation libs.facebook.android.sdk
     implementation libs.google.auth
@@ -51,6 +50,4 @@ dependencies {
     testImplementation libs.junit
     androidTestImplementation libs.ext.junit
     androidTestImplementation libs.espresso.core
-
->>>>>>> origin/feature/authentication-module
 }

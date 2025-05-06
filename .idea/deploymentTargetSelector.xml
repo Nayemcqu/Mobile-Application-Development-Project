@@ -5,16 +5,26 @@
       <SelectionState runConfigName="app">
         <option name="selectionMode" value="DROPDOWN" />
 <<<<<<< HEAD
+<<<<<<< HEAD
 =======
         <DropdownSelection timestamp="2025-05-04T02:37:34.644880200Z">
           <Target type="DEFAULT_BOOT">
             <handle>
               <DeviceId pluginId="LocalEmulator" identifier="path=C:\Users\kawpe\.android\avd\Pixel_4_XL.avd" />
+=======
+        <DropdownSelection timestamp="2025-04-29T02:20:11.333497900Z">
+          <Target type="DEFAULT_BOOT">
+            <handle>
+              <DeviceId pluginId="LocalEmulator" identifier="path=C:\Users\NAYEM\.android\avd\Pixel.avd" />
+>>>>>>> origin/feature-nav-bar
             </handle>
           </Target>
         </DropdownSelection>
         <DialogSelection />
+<<<<<<< HEAD
 >>>>>>> origin/feature/authentication-module
+=======
+>>>>>>> origin/feature-nav-bar
       </SelectionState>
     </selectionStates>
   </component>
