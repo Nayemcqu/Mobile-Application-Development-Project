@@ -1,16 +1,7 @@
 <resources xmlns:tools="http://schemas.android.com/tools">
-<<<<<<< HEAD
-    <!-- Base application theme. -->
-    <style name="Base.Theme.GenAIExpenseTracker" parent="Theme.Material3.DayNight.NoActionBar">
-        <!-- Customize your dark theme here. -->
-        <!-- <item name="colorPrimary">@color/my_dark_primary</item> -->
-        <item name="android:statusBarColor" >@android:color/transparent</item>
-    </style>
-=======
 
-    <!--  Base Theme -->
+    <!-- Base Theme for Night Mode -->
     <style name="Base.Theme.GenAIExpenseTracker" parent="Theme.Material3.DayNight.NoActionBar">
-
         <!-- Primary Colors -->
         <item name="colorOnPrimary">@color/white</item>
 
@@ -26,22 +17,15 @@
 
         <!-- Optional: disable elevation overlay for flat look -->
         <item name="materialThemeOverlay">@style/ThemeOverlay.Material3</item>
-
-        <!-- Shape appearance for buttons if needed -->
-        <!-- <item name="shapeAppearanceSmallComponent">@style/YourCustomShape</item> -->
     </style>
 
-    <!--  App Theme (used in AndroidManifest) -->
+    <!-- App Theme for Night Mode -->
     <style name="Theme.GenAIExpenseTracker" parent="Base.Theme.GenAIExpenseTracker" />
 
-    <!-- Hint Appearance (used in TextInputLayout) -->
+    <!-- Hint Appearance -->
     <style name="FloatingHintGrey" parent="TextAppearance.Material3.BodySmall">
         <item name="android:textColor">@color/grey</item>
         <item name="android:textSize">12sp</item>
     </style>
 
-
-
-
->>>>>>> origin/feature/authentication-module
 </resources>

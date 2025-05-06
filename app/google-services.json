@@ -12,9 +12,6 @@
           "package_name": "com.cqu.genaiexpensetracker"
         }
       },
-<<<<<<< HEAD
-      "oauth_client": [],
-=======
       "oauth_client": [
         {
           "client_id": "618808351610-pklfmj8sa19i5jnime7t4tmlcgc20ptd.apps.googleusercontent.com",
@@ -29,7 +26,6 @@
           "client_type": 3
         }
       ],
->>>>>>> origin/feature/authentication-module
       "api_key": [
         {
           "current_key": "AIzaSyBeVBK9zQ3FmEILME54kPxASbmN2Gq7aOc"
@@ -37,16 +33,12 @@
       ],
       "services": {
         "appinvite_service": {
-<<<<<<< HEAD
-          "other_platform_oauth_client": []
-=======
           "other_platform_oauth_client": [
             {
               "client_id": "618808351610-p3e2f359mjbsohb2jbl46thj24k8rdpq.apps.googleusercontent.com",
               "client_type": 3
             }
           ]
->>>>>>> origin/feature/authentication-module
         }
       }
     }

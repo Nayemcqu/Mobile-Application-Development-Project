@@ -2,33 +2,11 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools">
 
-<<<<<<< HEAD
-=======
-    <!--
-        AndroidManifest.xml
-
-        Author: Kapil Pandey
-        Syndey Group
-
-        Description:
-        Main manifest file for GenAI Expense Tracker app.
-
-        It includes:
-        - Permissions (Internet access)
-        - Application-level metadata (Facebook SDK)
-        - Activity declarations
-        - Firebase Dynamic Link intent filters
-        - App launcher configuration
-
-        Last Updated: May 2025
-    -->
-
     <!-- Permission for network access -->
     <uses-permission
         android:name="android.permission.INTERNET"
         tools:ignore="ManifestOrder" />
 
->>>>>>> origin/feature/authentication-module
     <application
         android:allowBackup="true"
         android:dataExtractionRules="@xml/data_extraction_rules"
@@ -39,23 +17,16 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.GenAIExpenseTracker"
         tools:targetApi="31">
-<<<<<<< HEAD
-        <activity
-            android:name=".navbar"
-            android:exported="false" />
+
+        <!-- MainActivity -->
         <activity
             android:name=".MainActivity"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
-
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-    </application>
-
-</manifest>
-=======
 
         <!-- App Screens (Activities) -->
         <activity android:name=".navbar" android:exported="false" />
@@ -95,8 +66,6 @@
         <activity
             android:name=".Welcome"
             android:exported="true">
-
-            <!-- Firebase Dynamic Link Redirect -->
             <intent-filter android:autoVerify="true">
                 <action android:name="android.intent.action.VIEW" />
                 <category android:name="android.intent.category.DEFAULT" />
@@ -105,14 +74,7 @@
                     android:scheme="https"
                     android:host="cqugenaiexpensetracker.page.link" />
             </intent-filter>
-
-            <!-- App Launcher Entry Point -->
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
-                <category android:name="android.intent.category.LAUNCHER" />
-            </intent-filter>
         </activity>
 
     </application>
 </manifest>
->>>>>>> origin/feature/authentication-module
