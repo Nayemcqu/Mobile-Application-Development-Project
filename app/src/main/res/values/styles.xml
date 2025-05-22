@@ -1,0 +1,10 @@
+<resources>
+
+    <style name="FAB_Circle_Shape" parent="Widget.MaterialComponents.FloatingActionButton">
+        <item name="shapeAppearanceOverlay">@style/FAB_Overlay</item>
+    </style>
+
+    <style name="FAB_Overlay" parent="">
+        <item name="cornerSize">50%</item>
+    </style>
+</resources>

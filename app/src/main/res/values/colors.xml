@@ -13,6 +13,21 @@
     <color name="blue">#0061B7</color> <!-- Action blue -->
     <color name="error_red">#FF0000</color> <!-- Error color (duplicate of red) -->
     <color name="yellow">#BA4925</color>
+    <color name="transparent">#00000000</color>
+
+    <color name="floating_circle_background">#F1EDFF</color>
+
+    <color name="primary">#8A2BE2</color> <!-- Purple or any main color -->
+    <color name="unselected">#000000</color> <!-- Gray for inactive items -->
+
+    <color name="income_green">#00BF63</color>
+    <color name="expense_red">#FF0000</color>
+    <color name="negative_balance">#ffd51e</color>
+    <color name="text_light">#6B6B6B</color>
+    <color name="purple_700">#3700B3</color>
+    <color name="purple_200">#BB86FC</color>
+    <color name="bar_value">#737373</color>
+    <color name="axis_value">#040606</color>
 
     <!-- ======= App Theme Colors ======= -->
     <color name="app_theme">#009dff</color> <!-- Primary brand blue -->

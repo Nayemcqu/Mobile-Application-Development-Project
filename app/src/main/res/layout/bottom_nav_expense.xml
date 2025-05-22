@@ -1,0 +1,267 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <!-- Scrollable content container -->
+    <androidx.core.widget.NestedScrollView
+        android:id="@+id/scroll_view"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:fillViewport="true"
+        android:padding="16dp">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+
+            <!-- Expense Summary CardView Shows total expenses and decorative graphic -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="12dp"
+                android:layout_marginEnd="6dp"
+                android:layout_marginBottom="16dp"
+                android:orientation="horizontal">
+
+                <androidx.cardview.widget.CardView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginHorizontal="8dp"
+                    android:layout_marginTop="4dp"
+                    app:cardBackgroundColor="@android:color/transparent"
+                    app:cardCornerRadius="20dp"
+                    app:cardElevation="6dp">
+
+                    <LinearLayout
+                        android:id="@+id/expense_summary_container"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:background="@drawable/expense_screen_cardview"
+                        android:gravity="center_vertical"
+                        android:orientation="horizontal"
+                        android:padding="20dp">
+
+                        <!-- Left: Text Block -->
+                        <LinearLayout
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:orientation="vertical">
+
+                            <TextView
+                                android:id="@+id/text_total_expense_amount"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:fontFamily="@font/arial_bold"
+                                android:text="$0.00"
+                                android:textColor="@android:color/white"
+                                android:textSize="24sp"
+                                android:textStyle="bold" />
+
+                            <TextView
+                                android:id="@+id/text_total_expense_label"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:fontFamily="@font/montserrat_bold"
+                                android:text="Total Expenses"
+                                android:textColor="@android:color/white"
+                                android:textSize="16sp" />
+                        </LinearLayout>
+
+                        <!-- Right: Graphic/Icon -->
+                        <ImageView
+                            android:id="@+id/img_expense_summary_graphic"
+                            android:layout_width="180dp"
+                            android:layout_height="100dp"
+                            android:scaleType="fitCenter"
+                            android:src="@drawable/expense_icon_group" />
+                    </LinearLayout>
+                </androidx.cardview.widget.CardView>
+            </LinearLayout>
+
+            <!-- Expense Filter Section Allows switching view between weekly, monthly, 6 months -->
+            <LinearLayout
+                android:id="@+id/expense_filter_container"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="14dp"
+                android:layout_marginTop="4dp"
+                android:layout_marginEnd="6dp"
+                android:layout_marginBottom="12dp"
+                android:orientation="vertical">
+
+                <!-- Expense List Title -->
+                <TextView
+                    android:id="@+id/expense_filter_title"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="8dp"
+                    android:fontFamily="@font/montserrat_bold"
+                    android:text="EXPENSE LIST"
+                    android:textColor="#303030"
+                    android:textSize="14sp"
+                    android:textStyle="bold" />
+
+                <!-- Chip Buttons -->
+                <LinearLayout
+                    android:id="@+id/expense_filter_chips"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="8dp"
+                    android:gravity="start"
+                    android:orientation="horizontal">
+
+                    <!-- Weekly Chip -->
+                    <Button
+                        android:id="@+id/btn_filter_weekly"
+                        android:layout_width="wrap_content"
+                        android:layout_height="40dp"
+                        android:layout_marginEnd="12dp"
+                        android:background="@drawable/chip_unselected"
+                        android:fontFamily="@font/arial_regular"
+                        android:paddingHorizontal="30dp"
+                        android:text="Weekly"
+                        android:textColor="#6B6B6B"
+                        android:textSize="14sp"
+                        android:textStyle="bold"
+                        app:backgroundTint="@null" />
+
+                    <!-- Monthly Chip -->
+                    <Button
+                        android:id="@+id/btn_filter_monthly"
+                        android:layout_width="wrap_content"
+                        android:layout_height="40dp"
+                        android:layout_marginEnd="12dp"
+                        android:background="@drawable/chip_unselected"
+                        android:fontFamily="@font/arial_regular"
+                        android:paddingHorizontal="30dp"
+                        android:text="Monthly"
+                        android:textColor="#6B6B6B"
+                        android:textSize="14sp"
+                        android:textStyle="bold"
+                        app:backgroundTint="@null" />
+
+                    <!-- 6 Months Chip -->
+                    <Button
+                        android:id="@+id/btn_filter_six_months"
+                        android:layout_width="wrap_content"
+                        android:layout_height="40dp"
+                        android:background="@drawable/chip_unselected"
+                        android:fontFamily="@font/arial_regular"
+                        android:paddingHorizontal="25dp"
+                        android:text="6 Months"
+                        android:textColor="#6B6B6B"
+                        android:textSize="14sp"
+                        android:textStyle="bold"
+                        app:backgroundTint="@null" />
+                </LinearLayout>
+            </LinearLayout>
+
+            <!-- Expense List Header with Date Range -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="14dp"
+                android:layout_marginTop="12dp"
+                android:layout_marginEnd="6dp"
+                android:layout_marginBottom="8dp"
+                android:gravity="center_vertical"
+                android:orientation="horizontal">
+
+                <!-- Title -->
+                <TextView
+                    android:id="@+id/expense_list_title"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:fontFamily="@font/montserrat_bold"
+                    android:text="THIS WEEK"
+                    android:textColor="#303030"
+                    android:textSize="14sp"
+                    android:textStyle="bold" />
+
+                <!-- Date Range -->
+                <TextView
+                    android:id="@+id/expense_list_date_range"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginEnd="6dp"
+                    android:fontFamily="@font/arial_regular"
+                    android:text="12 JUN - 19 JUN"
+                    android:textColor="#7C7C7C"
+                    android:textSize="13sp" />
+            </LinearLayout>
+
+            <!-- RecyclerView: Expense Item List -->
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/recycler_expense_list"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:clipToPadding="false"
+                android:paddingVertical="8dp"
+                android:scrollbars="vertical" />
+
+            <!-- Past Week Header -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="14dp"
+                android:layout_marginTop="16dp"
+                android:layout_marginEnd="6dp"
+                android:layout_marginBottom="8dp"
+                android:gravity="center_vertical"
+                android:orientation="horizontal">
+
+                <!-- Title -->
+                <TextView
+                    android:id="@+id/past_week_title"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:fontFamily="@font/montserrat_bold"
+                    android:text="PAST WEEK"
+                    android:textColor="#303030"
+                    android:textSize="14sp"
+                    android:textStyle="bold" />
+
+                <!-- Date Range (previous week) -->
+                <TextView
+                    android:id="@+id/past_week_date_range"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginEnd="6dp"
+                    android:fontFamily="@font/arial_regular"
+                    android:text="05 JUN - 11 JUN"
+                    android:textColor="#7C7C7C"
+                    android:textSize="13sp" />
+            </LinearLayout>
+
+            <!-- Past Week RecyclerView -->
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/recycler_expense_past_week"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:clipToPadding="false"
+                android:paddingVertical="8dp"
+                android:scrollbars="vertical" />
+
+        </LinearLayout>
+    </androidx.core.widget.NestedScrollView>
+
+    <!-- FloatingActionButton to add new expense -->
+    <com.google.android.material.floatingactionbutton.FloatingActionButton
+        android:id="@+id/fab_add_expense"
+        style="@style/FAB_Circle_Shape"
+        android:layout_width="56dp"
+        android:layout_height="56dp"
+        android:layout_gravity="bottom|end"
+        android:layout_margin="20dp"
+        android:contentDescription="Add Expense"
+        android:src="@drawable/ic_add_icon"
+        app:backgroundTint="#1b004d"
+        app:tint="@android:color/white" />
+
+</FrameLayout>

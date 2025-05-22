@@ -3,30 +3,34 @@
  * -------------------------
  * Author: Kapil Pandey
  * Syndey Group
- *
+ * <p>
  * Description:
- * This activity allows users to reset their password via Firebase Dynamic Link.
- * The user must enter a strong password and confirm it before it is updated in Firebase.
- *
+ * This activity allows users to reset their password using a Firebase Dynamic Link (`oobCode`).
+ * Users must enter a strong password and confirm it. On success, the password is updated via FirebaseAuth.
+ * <p>
  * Features:
- * - Password strength validation
- * - Real-time input feedback
+ * - Real-time password strength validation
+ * - Live matching of confirm password
  * - Firebase confirmPasswordReset integration
- * - Redirects to SignIn screen after success
+ * - Lottie-style success dialog with smooth transition to SignIn
  */
 
 package com.cqu.genaiexpensetracker;
 
-import android.app.ProgressDialog;
+import android.app.Dialog;
 import android.content.Intent;
 import android.os.Bundle;
+import android.os.Handler;
 import android.text.Editable;
 import android.text.InputType;
 import android.text.TextWatcher;
+import android.view.Gravity;
 import android.view.MotionEvent;
 import android.view.View;
+import android.view.Window;
 import android.view.inputmethod.InputMethodManager;
-import android.widget.*;
+import android.widget.LinearLayout;
+import android.widget.TextView;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.ContextCompat;
@@ -40,28 +44,28 @@ import java.util.Objects;
 
 public class SetNewPassword extends AppCompatActivity {
 
+    // Strong password regex: upper, lower, digit, special char, min 8 chars
+    private static final String PASSWORD_REGEX =
+            "^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[@$!%*?&]).{8,}$";
     // UI components
     private TextInputEditText newPasswordInput, confirmPasswordInput;
     private TextInputLayout newPasswordLayout, confirmPasswordLayout;
     private TextView newPasswordError, confirmPasswordError;
-    private Button updatePasswordBtn;
-
-    // State flags
+    private LinearLayout updatePasswordBtn;
+    // Visibility toggles
     private boolean isNewPasswordVisible = false;
     private boolean isConfirmPasswordVisible = false;
-
-    // Firebase and oobCode from reset link
+    // Firebase
     private FirebaseAuth mAuth;
     private String oobCode = null;
-    private ProgressDialog progressDialog;
 
     /**
-     * Entry point. Sets layout and initializes components.
+     * Lifecycle method. Initializes the layout and FirebaseAuth.
      */
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_set_new_password);
+        setContentView(R.layout.auth_activity_set_new_password);
 
         mAuth = FirebaseAuth.getInstance();
         extractOobCodeFromIntent();
@@ -70,7 +74,7 @@ public class SetNewPassword extends AppCompatActivity {
     }
 
     /**
-     * Extracts the oobCode from the incoming intent (Firebase dynamic link).
+     * Extracts the one-time reset code from the Firebase dynamic link.
      */
     private void extractOobCodeFromIntent() {
         Intent intent = getIntent();
@@ -84,7 +88,7 @@ public class SetNewPassword extends AppCompatActivity {
     }
 
     /**
-     * Binds UI components and sets up the progress dialog.
+     * Binds UI elements and buttons to their XML IDs.
      */
     private void initializeViews() {
         newPasswordInput = findViewById(R.id.update_new_password);
@@ -97,14 +101,10 @@ public class SetNewPassword extends AppCompatActivity {
         confirmPasswordError = findViewById(R.id.update_password_error);
 
         updatePasswordBtn = findViewById(R.id.update_btn);
-
-        progressDialog = new ProgressDialog(this);
-        progressDialog.setMessage("Updating password...");
-        progressDialog.setCancelable(false);
     }
 
     /**
-     * Sets up real-time input validation and button behavior.
+     * Sets up visibility toggles and real-time input validation.
      */
     private void setupListeners() {
         newPasswordInput.addTextChangedListener(new ValidationWatcher(newPasswordInput));
@@ -120,9 +120,9 @@ public class SetNewPassword extends AppCompatActivity {
     }
 
     /**
-     * Toggles password visibility between masked and plain text.
+     * Shows or hides password fields.
      *
-     * @param isPrimary true if toggling new password field, false for confirm field
+     * @param isPrimary true for newPasswordInput, false for confirmPasswordInput
      */
     private void toggleVisibility(boolean isPrimary) {
         TextInputEditText input = isPrimary ? newPasswordInput : confirmPasswordInput;
@@ -141,17 +141,17 @@ public class SetNewPassword extends AppCompatActivity {
     }
 
     /**
-     * Validates both password fields and updates password via Firebase if valid.
+     * Validates password and confirmPassword fields, then updates via Firebase if valid.
      */
     private void validateAndUpdatePassword() {
-        String newPassword = Objects.requireNonNull(newPasswordInput.getText()).toString().trim();
-        String confirmPassword = Objects.requireNonNull(confirmPasswordInput.getText()).toString().trim();
+        String password = Objects.requireNonNull(newPasswordInput.getText()).toString().trim();
+        String confirm = Objects.requireNonNull(confirmPasswordInput.getText()).toString().trim();
         boolean isValid = true;
 
-        if (newPassword.isEmpty()) {
+        if (password.isEmpty()) {
             showError(newPasswordLayout, newPasswordError, "Password is required.");
             isValid = false;
-        } else if (!newPassword.matches("^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[@$!%*?&]).{8,}$")) {
+        } else if (!password.matches(PASSWORD_REGEX)) {
             showError(newPasswordLayout, newPasswordError,
                     "Password must include uppercase, lowercase, digit, special char, and 8+ chars.");
             isValid = false;
@@ -159,10 +159,10 @@ public class SetNewPassword extends AppCompatActivity {
             clearError(newPasswordLayout, newPasswordError);
         }
 
-        if (confirmPassword.isEmpty()) {
+        if (confirm.isEmpty()) {
             showError(confirmPasswordLayout, confirmPasswordError, "Please confirm your password.");
             isValid = false;
-        } else if (!confirmPassword.equals(newPassword)) {
+        } else if (!confirm.equals(password)) {
             showError(confirmPasswordLayout, confirmPasswordError, "Passwords do not match.");
             isValid = false;
         } else {
@@ -173,23 +173,47 @@ public class SetNewPassword extends AppCompatActivity {
         }
 
         if (isValid && oobCode != null) {
-            progressDialog.show();
-            mAuth.confirmPasswordReset(oobCode, newPassword)
-                    .addOnSuccessListener(unused -> {
-                        progressDialog.dismiss();
-                        showSuccessDialog();
-                    })
-                    .addOnFailureListener(e -> {
-                        progressDialog.dismiss();
-                        showDialog("Failed", "Could not update password. Try requesting another link.");
-                    });
+            mAuth.confirmPasswordReset(oobCode, password)
+                    .addOnSuccessListener(unused -> showPasswordResetSuccessDialog())
+                    .addOnFailureListener(e -> showDialog("Failed", "Could not update password. Try requesting another link."));
         } else if (oobCode == null) {
             showDialog("Error", "Reset code missing. Please try again.");
         }
     }
 
     /**
-     * Shows a red error message and border for the input field.
+     * Displays a success dialog and navigates to SignIn after a delay.
+     */
+    private void showPasswordResetSuccessDialog() {
+        Dialog dialog = new Dialog(this);
+        dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
+        dialog.setContentView(R.layout.dialog_login_success);
+        dialog.setCancelable(false);
+
+        if (dialog.getWindow() != null) {
+            dialog.getWindow().setBackgroundDrawableResource(android.R.color.transparent);
+            dialog.getWindow().setDimAmount(0.5f);
+            dialog.getWindow().setGravity(Gravity.CENTER);
+        }
+
+        TextView successText = dialog.findViewById(R.id.success_message_text);
+        if (successText != null) {
+            successText.setText("Updated Successfully!");
+        }
+
+        dialog.show();
+
+        new Handler().postDelayed(() -> {
+            dialog.dismiss();
+            Intent intent = new Intent(SetNewPassword.this, SignIn.class);
+            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+            startActivity(intent);
+            finish();
+        }, 3200);
+    }
+
+    /**
+     * Shows red error styling on a field.
      */
     private void showError(TextInputLayout layout, TextView errorView, String message) {
         layout.setBoxStrokeColor(ContextCompat.getColor(this, R.color.red));
@@ -199,7 +223,7 @@ public class SetNewPassword extends AppCompatActivity {
     }
 
     /**
-     * Clears the error and displays a green border for valid input.
+     * Clears red styling and sets green border when valid.
      */
     private void clearError(TextInputLayout layout, TextView errorView) {
         layout.setBoxStrokeColor(ContextCompat.getColor(this, R.color.green));
@@ -207,33 +231,7 @@ public class SetNewPassword extends AppCompatActivity {
     }
 
     /**
-     * Real-time validation watcher to clear error on user input.
-     */
-    private class ValidationWatcher implements TextWatcher {
-        private final View view;
-
-        public ValidationWatcher(View view) {
-            this.view = view;
-        }
-
-        @Override public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
-        @Override public void onTextChanged(CharSequence s, int start, int before, int count) {}
-
-        @Override
-        public void afterTextChanged(Editable s) {
-            if (view == newPasswordInput) {
-                clearError(newPasswordLayout, newPasswordError);
-            } else if (view == confirmPasswordInput) {
-                clearError(confirmPasswordLayout, confirmPasswordError);
-            }
-        }
-    }
-
-    /**
-     * Shows an error dialog with custom icon and message.
-     *
-     * @param title   Dialog title
-     * @param message Dialog message
+     * Displays an alert dialog with title and message.
      */
     private void showDialog(String title, String message) {
         new MaterialAlertDialogBuilder(this)
@@ -246,26 +244,7 @@ public class SetNewPassword extends AppCompatActivity {
     }
 
     /**
-     * Shows success dialog and redirects to the SignIn screen.
-     */
-    private void showSuccessDialog() {
-        new MaterialAlertDialogBuilder(this)
-                .setTitle("Password Updated")
-                .setMessage("Your password has been reset successfully. Please sign in with your new password.")
-                .setIcon(R.drawable.ic_success_updated_password)
-                .setCancelable(false)
-                .setPositiveButton("Sign In", (dialog, which) -> {
-                    dialog.dismiss();
-                    Intent intent = new Intent(SetNewPassword.this, SignIn.class);
-                    intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-                    startActivity(intent);
-                    finish();
-                })
-                .show();
-    }
-
-    /**
-     * Hides the soft keyboard from screen.
+     * Hides keyboard when user taps outside fields.
      */
     private void hideKeyboard() {
         View view = getCurrentFocus();
@@ -276,7 +255,7 @@ public class SetNewPassword extends AppCompatActivity {
     }
 
     /**
-     * Dismisses keyboard when user touches outside input fields.
+     * Detects screen touches to dismiss keyboard.
      */
     @Override
     public boolean dispatchTouchEvent(MotionEvent ev) {
@@ -288,5 +267,69 @@ public class SetNewPassword extends AppCompatActivity {
             }
         }
         return super.dispatchTouchEvent(ev);
+    }
+
+    /**
+     * Live validation for both password and confirmPassword fields.
+     * Shows appropriate error messages and live feedback as user types.
+     */
+    private class ValidationWatcher implements TextWatcher {
+        private final View view;
+
+        public ValidationWatcher(View view) {
+            this.view = view;
+        }
+
+        @Override
+        public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+        }
+
+        @Override
+        public void onTextChanged(CharSequence s, int start, int before, int count) {
+        }
+
+        @Override
+        public void afterTextChanged(Editable s) {
+            String password = newPasswordInput.getText().toString().trim();
+            String confirm = confirmPasswordInput.getText().toString().trim();
+
+            if (view == newPasswordInput) {
+                // Validate new password field
+                if (password.isEmpty()) {
+                    showError(newPasswordLayout, newPasswordError, "Password is required.");
+                } else if (!password.matches(PASSWORD_REGEX)) {
+                    showError(newPasswordLayout, newPasswordError,
+                            "Password must include uppercase, lowercase, digit, special char, and 8+ chars.");
+                } else {
+                    clearError(newPasswordLayout, newPasswordError);
+                }
+
+                // Also validate confirm field if already typed
+                if (!confirm.isEmpty()) {
+                    if (confirm.equals(password)) {
+                        clearError(confirmPasswordLayout, confirmPasswordError);
+                        confirmPasswordError.setText(R.string.password_match);
+                        confirmPasswordError.setTextColor(ContextCompat.getColor(SetNewPassword.this, R.color.green));
+                        confirmPasswordError.setVisibility(View.VISIBLE);
+                    } else {
+                        showError(confirmPasswordLayout, confirmPasswordError, "Passwords do not match.");
+                    }
+                }
+
+            } else if (view == confirmPasswordInput) {
+
+                // Validate confirm password field
+                if (confirm.isEmpty()) {
+                    showError(confirmPasswordLayout, confirmPasswordError, "Please confirm your password.");
+                } else if (confirm.equals(password)) {
+                    clearError(confirmPasswordLayout, confirmPasswordError);
+                    confirmPasswordError.setText(R.string.password_match);
+                    confirmPasswordError.setTextColor(ContextCompat.getColor(SetNewPassword.this, R.color.green));
+                    confirmPasswordError.setVisibility(View.VISIBLE);
+                } else {
+                    showError(confirmPasswordLayout, confirmPasswordError, "Passwords do not match.");
+                }
+            }
+        }
     }
 }

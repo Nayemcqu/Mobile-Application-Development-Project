@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="horizontal"
+    android:paddingHorizontal="16dp"
+    android:paddingVertical="12dp">
+
+    <!-- Left: Category Icon -->
+    <ImageView
+        android:id="@+id/category_icon"
+        android:layout_width="40dp"
+        android:layout_height="40dp"
+        android:layout_gravity="center_vertical"
+        android:contentDescription="Expense Category Icon"
+        android:scaleType="centerInside"
+        android:src="@drawable/expense_income_default_icon" />
+
+    <!-- Center: Category Name & Time -->
+    <LinearLayout
+        android:layout_width="0dp"
+        android:layout_height="match_parent"
+        android:layout_marginStart="12dp"
+        android:layout_weight="1"
+        android:gravity="center_vertical"
+        android:orientation="vertical">
+
+        <TextView
+            android:id="@+id/text_income_category"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:fontFamily="@font/montserrat_bold"
+            android:text="Salary"
+            android:textColor="#333333"
+            android:textSize="16sp"
+            android:textStyle="bold" />
+
+        <TextView
+            android:id="@+id/income_item_time"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:fontFamily="@font/arial_regular"
+            android:text="3:00 PM"
+            android:textColor="#777777"
+            android:textSize="13sp" />
+    </LinearLayout>
+
+    <!-- Right: Amount -->
+    <TextView
+        android:id="@+id/text_income_amount"
+        android:layout_width="wrap_content"
+        android:layout_height="match_parent"
+        android:fontFamily="@font/montserrat_bold"
+        android:gravity="center_vertical"
+        android:text="+$0.00"
+        android:textColor="#00bf63"
+        android:textSize="16sp"
+        android:textStyle="bold" />
+</LinearLayout>

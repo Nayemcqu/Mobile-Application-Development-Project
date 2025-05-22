@@ -48,15 +48,11 @@
     <string name="error_email_required">Email is required.</string>
     <string name="error_password_required">Password is required.</string>
     <string name="error_email_invalid">Please enter a valid email address.</string>
-    <string name="error_login_title">Incorrect login details</string>
-    <string name="error_login_description">The email address or password combination you have entered is incorrect. Please try again or reset your password.</string>
+    <string name="error_login_description">Oops! Sign-in failed. Please check your email or password.</string>
     <string name="error_google_login">Google sign in failed</string>
     <string name="error_google_failed">Google Authentication Failed</string>
     <string name="error_facebook_cancelled">Facebook sign in canceled</string>
     <string name="error_facebook_failed">Facebook Authentication Failed</string>
-
-    <!-- Dialog / Messages -->
-    <string name="dialog_success">Welcome aboard! Your account has been created successfully.</string>
 
     <!-- Facebook SDK -->
     <string name="facebook_app_id">610721935344253</string>
@@ -66,6 +62,29 @@
     <!-- Google Web Client -->
     <string name="default_web_client_id">618808351610-pklfmj8sa19i5jnime7t4tmlcgc20ptd.apps.googleusercontent.com</string>
     <string name="get_started">Get Started</string>
+    <string name="sign_in_message">Signing you in securely...</string>
+    <string name="dollor">$0.00</string>
+
+    <!-- Dashboard Card View Details -->
+
+    <string name="total_balance">Total Balance</string>
+    <string name="income">Income</string>
+    <string name="expense">Expense</string>
+    <string name="amount_zero">$0.00</string>
+    <string name="income_arrow">Income Arrow</string>
+    <string name="expense_arrow">Expense Arrow</string>
+    <string name="add_expense_fragment">add expenses fragment</string>
+
+    <!-- List of expense categories for the add expense spinner (Dropdown expense category) -->
+    <string-array name="expense_categories">
+        <item>Select Category</item>
+        <item>Rent</item>
+        <item>Grocery</item>
+        <item>Food</item>
+        <item>Transport</item>
+    </string-array>
+
+
 </resources>
 
 

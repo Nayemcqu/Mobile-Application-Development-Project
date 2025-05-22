@@ -1,0 +1,291 @@
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:padding="20dp">
+
+    <!-- Header Section: Title, Subtitle, and Icon -->
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/add_expense_header"
+        android:layout_width="350dp"
+        android:layout_height="wrap_content">
+
+        <!-- Title + Subtitle -->
+        <LinearLayout
+            android:id="@+id/title_subtitle_container"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="6dp"
+            android:orientation="vertical"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toStartOf="@id/image_add_expense_icon"
+            app:layout_constraintHorizontal_chainStyle="packed"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent">
+
+            <TextView
+                android:id="@+id/text_add_expense_title"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:fontFamily="@font/montserrat_bold"
+                android:text="Add Expense"
+                android:textColor="#F15A29"
+                android:textSize="24sp"
+                android:textStyle="bold" />
+
+            <TextView
+                android:id="@+id/text_add_expense_subtitle"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="4dp"
+                android:fontFamily="@font/montserrat_semibold"
+                android:text="Please filled your expense\ndetails below"
+                android:textColor="#240D57"
+                android:textSize="13sp" />
+        </LinearLayout>
+
+        <!-- Right-side Icon -->
+        <ImageView
+            android:id="@+id/image_add_expense_icon"
+            android:layout_width="100dp"
+            android:layout_height="100dp"
+            android:layout_marginEnd="16dp"
+            android:contentDescription="Add Expense Icon"
+            android:scaleType="centerInside"
+            android:src="@drawable/ic_add_expense_icon_group"
+            app:layout_constraintBottom_toBottomOf="@id/title_subtitle_container"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="@id/title_subtitle_container" />
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+    <!-- Amount Input Field -->
+    <LinearLayout
+        android:id="@+id/expense_amount_container"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="24dp"
+        android:layout_marginTop="24dp"
+        android:layout_marginEnd="24dp"
+        android:orientation="vertical">
+
+        <!-- Label - Input Row -->
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="50dp"
+            android:background="@drawable/add_exp_income_field_bg"
+            android:gravity="center_vertical"
+            android:orientation="horizontal"
+            android:paddingStart="14dp"
+            android:paddingEnd="14dp">
+
+            <!-- Dollar Symbol -->
+            <TextView
+                android:id="@+id/text_amount_prefix"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="1dp"
+                android:fontFamily="@font/montserrat_bold"
+                android:text="AUD"
+                android:textColor="#737373"
+                android:textSize="16sp" />
+
+            <!-- EditText -->
+            <EditText
+                android:id="@+id/input_amount"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_marginStart="8dp"
+                android:layout_weight="1"
+                android:background="@android:color/transparent"
+                android:fontFamily="@font/montserrat_regular"
+                android:hint="0.00 (Amount)"
+                android:inputType="numberDecimal"
+                android:textColor="@color/black"
+                android:textSize="16sp" />
+        </LinearLayout>
+    </LinearLayout>
+
+    <!-- Category Dropdown Container -->
+    <LinearLayout
+        android:id="@+id/expense_category_container"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="24dp"
+        android:layout_marginTop="20dp"
+        android:layout_marginEnd="24dp"
+        android:orientation="vertical">
+
+        <!-- Styled Spinner with dropdown icon -->
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="50dp"
+            android:background="@drawable/add_exp_income_field_bg"
+            android:gravity="center_vertical"
+            android:paddingStart="14dp"
+            android:paddingEnd="14dp">
+
+            <Spinner
+                android:id="@+id/spinner_expense_category"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:background="@android:color/transparent"
+                android:dropDownHorizontalOffset="0dp"
+                android:dropDownVerticalOffset="10dp"
+                android:paddingEnd="40dp"
+                android:popupBackground="@android:color/white"
+                android:spinnerMode="dropdown" />
+
+            <ImageView
+                android:id="@+id/category_drop_down_icon"
+                android:layout_width="20dp"
+                android:layout_height="20dp"
+                android:layout_alignParentEnd="true"
+                android:layout_centerVertical="true"
+                android:contentDescription="Dropdown Icon"
+                android:src="@drawable/ic_dropdown_arrow" />
+        </RelativeLayout>
+    </LinearLayout>
+
+    <!-- Date Picker Container -->
+    <LinearLayout
+        android:id="@+id/expense_date_container"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="24dp"
+        android:layout_marginTop="20dp"
+        android:layout_marginEnd="24dp"
+        android:orientation="vertical">
+
+        <!-- Date Input Field with Calendar Icon -->
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="50dp"
+            android:background="@drawable/add_exp_income_field_bg"
+            android:gravity="center_vertical"
+            android:paddingStart="14dp"
+            android:paddingEnd="14dp">
+
+            <EditText
+                android:id="@+id/edit_text_date"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:background="@android:color/transparent"
+                android:focusable="false"
+                android:fontFamily="@font/montserrat_regular"
+                android:hint="dd/mm/yyyy"
+                android:inputType="none"
+                android:paddingEnd="40dp"
+                android:textColor="@android:color/black"
+                android:textSize="14sp" />
+
+            <ImageView
+                android:id="@+id/icon_calendar"
+                android:layout_width="22dp"
+                android:layout_height="22dp"
+                android:layout_alignParentEnd="true"
+                android:layout_centerVertical="true"
+                android:contentDescription="Calendar Icon"
+                android:src="@drawable/ic_calendar_icon" />
+        </RelativeLayout>
+    </LinearLayout>
+
+    <!-- Add Note Field -->
+    <LinearLayout
+        android:id="@+id/expense_note_container"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="24dp"
+        android:layout_marginTop="20dp"
+        android:layout_marginEnd="24dp"
+        android:orientation="vertical">
+
+        <!-- Multi-line Input -->
+        <EditText
+            android:id="@+id/edit_text_note"
+            android:layout_width="match_parent"
+            android:layout_height="65dp"
+            android:background="@drawable/add_exp_income_field_bg"
+            android:fontFamily="@font/montserrat_regular"
+            android:gravity="top|start"
+            android:hint="Add Note (e.g, Rent Paid, Shopping etc.)"
+            android:inputType="textMultiLine"
+            android:padding="16dp"
+            android:textColor="@color/black"
+            android:textSize="14sp" />
+    </LinearLayout>
+
+    <!-- Upload Receipt Field -->
+    <LinearLayout
+        android:id="@+id/expense_receipt_container"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="24dp"
+        android:layout_marginTop="20dp"
+        android:layout_marginEnd="24dp"
+        android:orientation="vertical">
+
+        <!-- Label -->
+        <TextView
+            android:id="@+id/text_label_receipt"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="6dp"
+            android:layout_marginBottom="6dp"
+            android:fontFamily="@font/montserrat_bold"
+            android:text="Upload Receipt (optional)"
+            android:textColor="#808080"
+            android:textSize="14sp" />
+
+        <!-- Upload Field -->
+        <LinearLayout
+            android:id="@+id/receipt_upload_box"
+            android:layout_width="match_parent"
+            android:layout_height="40dp"
+            android:background="@drawable/add_exp_income_field_bg"
+            android:gravity="center_vertical"
+            android:orientation="horizontal"
+            android:paddingStart="14dp"
+            android:paddingEnd="14dp">
+
+            <!-- Folder Icon -->
+            <ImageView
+                android:id="@+id/icon_upload_receipt"
+                android:layout_width="24dp"
+                android:layout_height="24dp"
+                android:contentDescription="Upload Receipt Icon"
+                android:src="@drawable/ic_upload_receipt"
+                app:tint="#000000" />
+
+            <!-- Placeholder (optional, e.g., file name) -->
+            <TextView
+                android:id="@+id/text_receipt_filename"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="12dp"
+                android:fontFamily="@font/montserrat_regular"
+                android:text="Choose file"
+                android:textColor="#000000"
+                android:textSize="14sp" />
+        </LinearLayout>
+    </LinearLayout>
+
+    <!-- Save Button -->
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/button_save_expense"
+        android:layout_width="200dp"
+        android:layout_height="48dp"
+        android:layout_gravity="center"
+        android:layout_marginTop="28dp"
+        android:layout_marginBottom="32dp"
+        android:background="@drawable/add_exp_income_btn_bg"
+        android:fontFamily="@font/montserrat_bold"
+        android:text="SAVE"
+        android:textColor="@color/white"
+        android:textSize="14sp"
+        android:textStyle="bold"
+        app:backgroundTint="@null"
+        tools:selected="true" />
+</LinearLayout>

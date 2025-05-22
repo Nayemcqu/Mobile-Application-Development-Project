@@ -3,31 +3,35 @@
  * -------------------------
  * Author: Kapil Pandey
  * Syndey Group
- *
+ * <p>
  * Description:
  * This activity allows users to reset their password by:
  * - Validating email format
- * - Checking user existence in Firestore
- * - Sending Firebase reset email if valid
- *
+ * - Checking user existence in FirebaseAuth
+ * - Sending Firebase reset email if valid and password-based
+ * <p>
  * Features:
  * - Live email validation with green check indicator
  * - Custom progress dialog for feedback
- * - Integration with Firebase Authentication and Firestore
+ * - Integration with Firebase Authentication only
  */
 
 package com.cqu.genaiexpensetracker;
 
-import android.app.ProgressDialog;
+import android.app.Dialog;
 import android.content.Intent;
 import android.os.Bundle;
+import android.os.Handler;
 import android.text.Editable;
 import android.text.TextUtils;
 import android.text.TextWatcher;
 import android.view.MotionEvent;
 import android.view.View;
+import android.view.Window;
 import android.view.inputmethod.InputMethodManager;
-import android.widget.*;
+import android.widget.ImageView;
+import android.widget.LinearLayout;
+import android.widget.TextView;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.ContextCompat;
@@ -35,7 +39,6 @@ import androidx.core.content.ContextCompat;
 import com.google.android.material.textfield.TextInputEditText;
 import com.google.android.material.textfield.TextInputLayout;
 import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.firestore.FirebaseFirestore;
 
 import java.util.Objects;
 
@@ -46,27 +49,29 @@ public class ForgotPassword extends AppCompatActivity {
     private TextInputEditText emailInput;
     private TextInputLayout emailLayout;
     private TextView emailError;
-    private Button nextBtn;
-    private ProgressDialog progressDialog;
+    private LinearLayout nextBtn;
+    private Dialog loadingDialog;
 
-    // Firebase
+    // Firebase Authentication instance
     private FirebaseAuth mAuth;
 
-    /**
-     * Initializes the activity and binds views.
-     */
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_forgot_password);
+        setContentView(R.layout.auth_activity_forgot_password);
 
+        // Initialize FirebaseAuth instance
         mAuth = FirebaseAuth.getInstance();
+
+        // Initialize UI components
         initViews();
+
+        // Set up event listeners for UI interactions
         setupListeners();
     }
 
     /**
-     * Initializes UI components and progress dialog.
+     * Initializes UI components by linking them with their corresponding views in the layout.
      */
     private void initViews() {
         backBtn = findViewById(R.id.login_back_btn);
@@ -74,37 +79,37 @@ public class ForgotPassword extends AppCompatActivity {
         emailLayout = findViewById(R.id.forgot_email_input_layout);
         emailError = findViewById(R.id.forgot_email_error);
         nextBtn = findViewById(R.id.forgot_password);
-
-        progressDialog = new ProgressDialog(this);
-        progressDialog.setMessage("Checking email...");
-        progressDialog.setCancelable(false);
     }
 
     /**
-     * Sets up event listeners for buttons and input fields.
+     * Sets up event listeners for UI components to handle user interactions.
      */
     private void setupListeners() {
-        // Navigate back to SignIn
+        // Navigate back to SignIn activity when back button is clicked
         backBtn.setOnClickListener(v -> {
             startActivity(new Intent(ForgotPassword.this, SignIn.class));
             finish();
         });
 
-        // Submit button to validate and check email
+        // Validate email and initiate password reset when next button is clicked
         nextBtn.setOnClickListener(v -> {
             hideKeyboard();
             validateAndCheckEmail();
         });
 
-        // Email input validation with real-time feedback
+        // Add text change listener to email input for real-time validation
         emailInput.addTextChangedListener(new TextWatcher() {
-            @Override public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
-            @Override public void onTextChanged(CharSequence s, int start, int before, int count) {}
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+            }
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+            }
 
             @Override
             public void afterTextChanged(Editable s) {
                 String email = s.toString().trim();
-
                 if (TextUtils.isEmpty(email)) {
                     removeGreenTick();
                     emailLayout.setBoxStrokeColor(ContextCompat.getColor(ForgotPassword.this, R.color.red));
@@ -124,11 +129,10 @@ public class ForgotPassword extends AppCompatActivity {
     }
 
     /**
-     * Validates input and checks Firestore for existing account.
+     * Validates the entered email and initiates the password reset process if valid.
      */
     private void validateAndCheckEmail() {
-        String rawEmail = Objects.requireNonNull(emailInput.getText()).toString();
-        String email = rawEmail.trim().toLowerCase();
+        String email = Objects.requireNonNull(emailInput.getText()).toString().trim().toLowerCase();
 
         if (TextUtils.isEmpty(email)) {
             showError("Email is required.");
@@ -142,55 +146,97 @@ public class ForgotPassword extends AppCompatActivity {
             return;
         }
 
-        progressDialog.setMessage("Checking email...");
-        progressDialog.show();
-
-        FirebaseFirestore.getInstance()
-                .collection("users")
-                .whereEqualTo("email", email)
-                .get()
-                .addOnCompleteListener(task -> {
-                    progressDialog.dismiss();
-                    if (task.isSuccessful()) {
-                        if (!task.getResult().isEmpty()) {
-                            clearError();
-                            sendResetEmail(email);
-                        } else {
-                            showError("This email is not registered.");
-                            removeGreenTick();
-                        }
-                    } else {
-                        showError("Failed to check registration. Try again.");
-                        removeGreenTick();
-                    }
-                });
+        clearError();
+        sendResetEmail(email); // Directly send reset email
     }
 
     /**
-     * Sends a Firebase password reset email.
+     * Sends a password reset email to the provided email address using Firebase Authentication.
      *
-     * @param email The validated and registered email address
+     * @param email The email address to send the password reset email to.
      */
     private void sendResetEmail(String email) {
-        progressDialog.show();
-        mAuth.sendPasswordResetEmail(email)
-                .addOnCompleteListener(task -> {
-                    progressDialog.dismiss();
-                    if (task.isSuccessful()) {
-                        Toast.makeText(this, "Password reset email sent!", Toast.LENGTH_LONG).show();
-                        startActivity(new Intent(ForgotPassword.this, SignIn.class));
-                        finish();
-                    } else {
-                        showError("Failed to send reset email. Try again.");
-                        removeGreenTick();
-                    }
-                });
+        showVerifyingLoader();
+        mAuth.sendPasswordResetEmail(email).addOnCompleteListener(task -> {
+            hideVerifyingLoader();
+            if (task.isSuccessful()) {
+                showPasswordResetSuccessDialog();
+            } else {
+                // Show generic message to prevent email enumeration
+                showError("If this email is registered, you will receive a password reset email.");
+                removeGreenTick();
+            }
+        });
     }
 
     /**
-     * Displays an error with red border and error message.
+     * Displays a loading dialog indicating that the email verification is in progress.
+     */
+    private void showVerifyingLoader() {
+        loadingDialog = new Dialog(this);
+        loadingDialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
+        loadingDialog.setContentView(R.layout.dialog_loading_screen);
+        loadingDialog.setCancelable(false);
+
+        if (loadingDialog.getWindow() != null) {
+            loadingDialog.getWindow().setBackgroundDrawableResource(android.R.color.transparent);
+            loadingDialog.getWindow().setDimAmount(0.4f);
+            loadingDialog.getWindow().setGravity(android.view.Gravity.CENTER);
+        }
+
+        TextView messageText = loadingDialog.findViewById(R.id.loading_text);
+        if (messageText != null) {
+            messageText.setText("Checking your email...");
+        }
+
+        loadingDialog.show();
+    }
+
+    /**
+     * Hides the verifying loader dialog if it is currently displayed.
+     */
+    private void hideVerifyingLoader() {
+        if (loadingDialog != null && loadingDialog.isShowing()) {
+            loadingDialog.dismiss();
+        }
+    }
+
+    /**
+     * Displays a success dialog indicating that the password reset email has been sent.
+     * After a short delay, navigates back to the SignIn activity.
+     */
+    private void showPasswordResetSuccessDialog() {
+        Dialog dialog = new Dialog(this);
+        dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
+        dialog.setContentView(R.layout.dialog_verification_sent);
+        dialog.setCancelable(false);
+
+        if (dialog.getWindow() != null) {
+            dialog.getWindow().setBackgroundDrawableResource(android.R.color.transparent);
+            dialog.getWindow().setDimAmount(0.6f);
+            dialog.getWindow().setGravity(android.view.Gravity.CENTER);
+        }
+
+        TextView titleText = dialog.findViewById(R.id.email_verification);
+        TextView messageText = dialog.findViewById(R.id.email_message);
+
+        if (titleText != null) titleText.setText("Password reset email sent");
+        if (messageText != null)
+            messageText.setText("Please check your inbox to reset your password.");
+
+        dialog.show();
+
+        new Handler().postDelayed(() -> {
+            dialog.dismiss();
+            startActivity(new Intent(ForgotPassword.this, SignIn.class));
+            finish();
+        }, 2500);
+    }
+
+    /**
+     * Displays an error message below the email input field.
      *
-     * @param message The message to show
+     * @param message The error message to display.
      */
     private void showError(String message) {
         emailLayout.setBoxStrokeColor(ContextCompat.getColor(this, R.color.red));
@@ -200,7 +246,7 @@ public class ForgotPassword extends AppCompatActivity {
     }
 
     /**
-     * Clears validation error and shows green border.
+     * Clears any displayed error messages and sets the email input field to indicate success.
      */
     private void clearError() {
         emailLayout.setBoxStrokeColor(ContextCompat.getColor(this, R.color.green));
@@ -208,7 +254,7 @@ public class ForgotPassword extends AppCompatActivity {
     }
 
     /**
-     * Displays green checkmark on valid email format.
+     * Displays a green tick icon in the email input field to indicate valid input.
      */
     private void showGreenTick() {
         emailLayout.setEndIconMode(TextInputLayout.END_ICON_CUSTOM);
@@ -217,7 +263,7 @@ public class ForgotPassword extends AppCompatActivity {
     }
 
     /**
-     * Removes green tick from the email field.
+     * Removes the green tick icon from the email input field.
      */
     private void removeGreenTick() {
         emailLayout.setEndIconMode(TextInputLayout.END_ICON_CLEAR_TEXT);
@@ -225,7 +271,10 @@ public class ForgotPassword extends AppCompatActivity {
     }
 
     /**
-     * Hides the keyboard when user taps outside the input field.
+     * Overrides the dispatchTouchEvent to hide the keyboard when the user touches outside the input field.
+     *
+     * @param ev The motion event.
+     * @return True if the event was handled, false otherwise.
      */
     @Override
     public boolean dispatchTouchEvent(MotionEvent ev) {
@@ -240,7 +289,7 @@ public class ForgotPassword extends AppCompatActivity {
     }
 
     /**
-     * Hides the on-screen keyboard.
+     * Hides the soft keyboard if it is currently displayed.
      */
     private void hideKeyboard() {
         View view = getCurrentFocus();

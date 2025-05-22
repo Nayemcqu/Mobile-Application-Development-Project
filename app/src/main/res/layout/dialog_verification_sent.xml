@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="300dp"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:padding="24dp"
+    android:gravity="center"
+    android:background="@drawable/loader_dialog_bg">
+
+    <com.airbnb.lottie.LottieAnimationView
+        android:layout_width="150dp"
+        android:layout_height="150dp"
+        app:lottie_fileName="verify_email_sent.json"
+        app:lottie_autoPlay="true"
+        app:lottie_loop="false" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/email_verification"
+        android:text="Verification email sent!"
+        android:textSize="18sp"
+        android:fontFamily="@font/montserrat_bold"
+        android:textColor="@color/blue"
+        android:layout_marginTop="16dp"
+        android:gravity="center" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/email_message"
+        android:text="Please check your inbox to verify your email."
+        android:fontFamily="@font/montserrat_semibold"
+        android:textSize="14sp"
+        android:textColor="#555"
+        android:layout_marginTop="8dp"
+        android:gravity="center" />
+</LinearLayout>

@@ -1,9 +1,9 @@
 <component name="libraryTable">
   <library name="Gradle: io.github.chaosleung:pinview:1.4.4@aar" external-system-id="GRADLE">
     <CLASSES>
-      <root url="jar://$USER_HOME$/.gradle/caches/8.11.1/transforms/706da2c1a06a4b0c2875aadc777a0032/transformed/pinview-1.4.4/jars/classes.jar!/" />
-      <root url="file://$USER_HOME$/.gradle/caches/8.11.1/transforms/706da2c1a06a4b0c2875aadc777a0032/transformed/pinview-1.4.4/AndroidManifest.xml" />
-      <root url="file://$USER_HOME$/.gradle/caches/8.11.1/transforms/706da2c1a06a4b0c2875aadc777a0032/transformed/pinview-1.4.4/res" />
+      <root url="file://$USER_HOME$/.gradle/caches/8.11.1/transforms/80d65b7a08e7e43bda45393136629c08/transformed/pinview-1.4.4/AndroidManifest.xml" />
+      <root url="jar://$USER_HOME$/.gradle/caches/8.11.1/transforms/80d65b7a08e7e43bda45393136629c08/transformed/pinview-1.4.4/jars/classes.jar!/" />
+      <root url="file://$USER_HOME$/.gradle/caches/8.11.1/transforms/80d65b7a08e7e43bda45393136629c08/transformed/pinview-1.4.4/res" />
     </CLASSES>
     <JAVADOC>
       <root url="jar://$USER_HOME$/.gradle/caches/modules-2/files-2.1/io.github.chaosleung/pinview/1.4.4/87f73ac2bed8b01c2d4876b4fa5398811c5941d0/pinview-1.4.4-javadoc.jar!/" />

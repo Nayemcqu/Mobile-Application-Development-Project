@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <item
+        android:id="@+id/income_menu"
+        android:icon="@drawable/ic_income_icon_1"
+        android:title="Add income" />
+    <item
+        android:id="@+id/expense_menu"
+        android:icon="@drawable/ic_expense_icon_1"
+        android:title=" Add expense" />
+    <item
+        android:id="@+id/insights_menu"
+        android:icon="@drawable/ic_insights_icon"
+        android:title="AI Insights" />
+    <item
+        android:id="@+id/profile_menu"
+        android:icon="@drawable/baseline_account_circle_24"
+        android:title="Profile" />
+
+    <item
+        android:id="@+id/setting_menu"
+        android:icon="@drawable/ic_setting_icon"
+        android:title="Setting" />
+
+    <item
+        android:id="@+id/share_menu"
+        android:icon="@drawable/ic_share_icon"
+        android:title="Share" />
+
+    <item
+        android:id="@+id/privacy_menu"
+        android:icon="@drawable/ic_privacy_icon"
+        android:title="Privacy Policy" />
+
+    <item
+        android:id="@+id/logout_menu"
+        android:icon="@drawable/ic_signout_icon"
+        android:title="Sign Out" />
+</menu>

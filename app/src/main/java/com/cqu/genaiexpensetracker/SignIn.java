@@ -3,18 +3,18 @@
  * -------------------------
  * Author: Kapil Pandey
  * Syndey Group
- *
+ * <p>
  * Description:
  * This activity manages user authentication using Firebase for:
  * - Email & Password
  * - Google Sign-In
  * - Facebook Login
- *
+ * <p>
  * Features:
  * - Live input validation and visual feedback
  * - "Remember Me" support using SharedPreferences
  * - Firestore integration to save user details
- * - Custom loading dialog for smoother transitions
+ * - Custom loading & success/error dialogs for smoother transitions
  */
 
 package com.cqu.genaiexpensetracker;
@@ -25,6 +25,7 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Rect;
 import android.os.Bundle;
+import android.os.Handler;
 import android.text.Editable;
 import android.text.InputType;
 import android.text.TextWatcher;
@@ -33,7 +34,11 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.view.Window;
 import android.view.inputmethod.InputMethodManager;
-import android.widget.*;
+import android.widget.Button;
+import android.widget.CheckBox;
+import android.widget.LinearLayout;
+import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
@@ -41,65 +46,77 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.ContextCompat;
 
-import com.facebook.*;
+import com.facebook.AccessToken;
+import com.facebook.CallbackManager;
+import com.facebook.FacebookCallback;
+import com.facebook.FacebookException;
 import com.facebook.login.LoginManager;
 import com.facebook.login.LoginResult;
-import com.google.android.gms.auth.api.signin.*;
+import com.google.android.gms.auth.api.signin.GoogleSignIn;
+import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
+import com.google.android.gms.auth.api.signin.GoogleSignInClient;
+import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
 import com.google.android.gms.common.api.ApiException;
 import com.google.android.gms.tasks.Task;
 import com.google.android.material.textfield.TextInputEditText;
 import com.google.android.material.textfield.TextInputLayout;
-import com.google.firebase.auth.*;
+import com.google.firebase.auth.AuthCredential;
+import com.google.firebase.auth.FacebookAuthProvider;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.auth.GoogleAuthProvider;
 import com.google.firebase.firestore.FirebaseFirestore;
 
 import java.util.Arrays;
 
 public class SignIn extends AppCompatActivity {
 
+    private static final String PREFS_NAME = "LoginPrefs";
     // Firebase and social login
     private FirebaseAuth mAuth;
     private GoogleSignInClient googleSignInClient;
     private CallbackManager callbackManager;
     private ActivityResultLauncher<Intent> googleSignInLauncher;
-
     // UI components
     private TextInputEditText emailInput, passwordInput;
     private TextInputLayout emailInputLayout, passwordInputLayout;
-    private TextView emailError, passwordError, loginErrorTitle, loginErrorDescription;
-    private Button signInButton, googleSignInButton, facebookSignInButton;
+    private TextView emailError, passwordError;
+    private LinearLayout signInButton;
+    private TextView signInText;
+    private Button googleSignInButton, facebookSignInButton;
     private CheckBox rememberMeCheckBox;
-    private LinearLayout loginErrorContainer;
-
-    // Dialog
+    // Dialogs
     private Dialog loaderDialog;
-
+    private Dialog errorDialog;
     // SharedPreferences for Remember Me
     private SharedPreferences sharedPreferences;
-    private static final String PREFS_NAME = "LoginPrefs";
-
     // State flags
     private boolean isPasswordVisible = false;
     private boolean isEmailValid = false;
 
-    /**
-     * Initializes the activity lifecycle and all components.
-     */
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_sign_in);
+        setContentView(R.layout.auth_activity_sign_in);
 
+        // Initialize Firebase authentication and Facebook callback manager
         initializeFirebase();
+        // Initialize UI components and configure default settings
         initializeViews();
+        // Set up Google Sign-In client and launcher
         initializeGoogleSignIn();
+        // Set up Facebook Login callback
         initializeFacebookLogin();
+        // Set up listeners for user interactions
         setupListeners();
+        // Load saved credentials if "Remember Me" was checked
         loadRememberedCredentials();
+        // Update the state of the login button based on input fields
         updateLoginButtonState();
     }
 
     /**
-     * Initializes FirebaseAuth and Facebook callback manager.
+     * Initializes Firebase authentication and Facebook callback manager.
      */
     private void initializeFirebase() {
         mAuth = FirebaseAuth.getInstance();
@@ -107,7 +124,8 @@ public class SignIn extends AppCompatActivity {
     }
 
     /**
-     * Initializes all UI views and sets up loader dialog.
+     * Initializes all UI view components and sets default configurations,
+     * including setting up SharedPreferences and input layouts.
      */
     private void initializeViews() {
         emailInput = findViewById(R.id.login_email);
@@ -120,32 +138,30 @@ public class SignIn extends AppCompatActivity {
         googleSignInButton = findViewById(R.id.button_login_google);
         facebookSignInButton = findViewById(R.id.button_login_facebook);
         rememberMeCheckBox = findViewById(R.id.checkbox_remember);
-        loginErrorContainer = findViewById(R.id.login_error_container);
-        loginErrorTitle = findViewById(R.id.login_error_title);
-        loginErrorDescription = findViewById(R.id.login_error_description);
+        signInText = findViewById(R.id.sign_in_text);
 
         sharedPreferences = getSharedPreferences(PREFS_NAME, MODE_PRIVATE);
-
+        // Configure loader dialog
         loaderDialog = new Dialog(this);
         loaderDialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
-        loaderDialog.setContentView(R.layout.dialog_loader);
+        loaderDialog.setContentView(R.layout.dialog_loading_screen);
         loaderDialog.setCancelable(false);
         if (loaderDialog.getWindow() != null) {
             loaderDialog.getWindow().setBackgroundDrawableResource(android.R.color.transparent);
             loaderDialog.getWindow().setDimAmount(0.6f);
             loaderDialog.getWindow().setGravity(Gravity.CENTER);
         }
-
+        // Configure password visibility toggle
         passwordInputLayout.setEndIconMode(TextInputLayout.END_ICON_CUSTOM);
         passwordInputLayout.setEndIconDrawable(R.drawable.ic_eye_hidden);
         passwordInputLayout.setEndIconTintList(ContextCompat.getColorStateList(this, R.color.black));
-
+        // Set up navigation to Forgot Password and Sign Up activities
         findViewById(R.id.btn_forgot_password).setOnClickListener(v -> startActivity(new Intent(this, ForgotPassword.class)));
         findViewById(R.id.text_sign_up).setOnClickListener(v -> startActivity(new Intent(this, SignUp.class)));
     }
 
     /**
-     * Loads saved email/password if Remember Me was previously selected.
+     * Loads saved credentials if "Remember Me" was previously checked.
      */
     private void loadRememberedCredentials() {
         if (sharedPreferences.getBoolean("remember", false)) {
@@ -156,7 +172,7 @@ public class SignIn extends AppCompatActivity {
     }
 
     /**
-     * Configures Google Sign-In and handles result.
+     * Configures Google Sign-In client and sets up a launcher for result handling.
      */
     private void initializeGoogleSignIn() {
         GoogleSignInOptions gso = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
@@ -177,7 +193,7 @@ public class SignIn extends AppCompatActivity {
     }
 
     /**
-     * Initializes Facebook Login and handles callback events.
+     * Initializes Facebook Login and registers callback for login results.
      */
     private void initializeFacebookLogin() {
         LoginManager.getInstance().registerCallback(callbackManager, new FacebookCallback<LoginResult>() {
@@ -197,7 +213,7 @@ public class SignIn extends AppCompatActivity {
     }
 
     /**
-     * Attaches field validation and click listeners to inputs and buttons.
+     * Sets up listeners for user interactions, including input validation and button clicks.
      */
     private void setupListeners() {
         emailInput.setOnFocusChangeListener((v, hasFocus) -> validateEmail());
@@ -208,8 +224,12 @@ public class SignIn extends AppCompatActivity {
                 validateEmail();
                 updateLoginButtonState();
             }
-            public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
-            public void onTextChanged(CharSequence s, int start, int before, int count) {}
+
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+            }
+
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+            }
         });
 
         passwordInput.addTextChangedListener(new TextWatcher() {
@@ -217,8 +237,12 @@ public class SignIn extends AppCompatActivity {
                 validatePassword();
                 updateLoginButtonState();
             }
-            public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
-            public void onTextChanged(CharSequence s, int start, int before, int count) {}
+
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+            }
+
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+            }
         });
 
         signInButton.setOnClickListener(v -> validateInputsAndLogin());
@@ -236,7 +260,7 @@ public class SignIn extends AppCompatActivity {
     }
 
     /**
-     * Validates user input and performs Firebase login if valid.
+     * Validates input fields and initiates login if inputs are valid.
      */
     private void validateInputsAndLogin() {
         hideKeyboardAndClearFocus();
@@ -249,36 +273,91 @@ public class SignIn extends AppCompatActivity {
     }
 
     /**
-     * Logs the user in with email/password via Firebase.
+     * Performs login using Firebase Authentication with email and password.
      *
-     * @param email    The entered email
-     * @param password The entered password
+     * @param email    User's email address
+     * @param password User's password
      */
     private void performLogin(String email, String password) {
         showLoader();
         mAuth.signInWithEmailAndPassword(email, password).addOnCompleteListener(task -> {
             if (task.isSuccessful()) {
-                if (rememberMeCheckBox.isChecked()) {
-                    sharedPreferences.edit()
-                            .putString("email", email)
-                            .putString("password", password)
-                            .putBoolean("remember", true)
-                            .apply();
+                FirebaseUser user = mAuth.getCurrentUser();
+                if (user != null && user.isEmailVerified()) {
+                    if (rememberMeCheckBox.isChecked()) {
+                        sharedPreferences.edit()
+                                .putString("email", email)
+                                .putString("password", password)
+                                .putBoolean("remember", true)
+                                .apply();
+                    } else {
+                        sharedPreferences.edit().clear().apply();
+                    }
+                    showSuccessAndNavigate();
                 } else {
-                    sharedPreferences.edit().clear().apply();
+                    mAuth.signOut();
+                    hideLoader();
+                    showEmailNotVerifiedDialog();
                 }
-                navigateToDashboard();
             } else {
                 hideLoader();
-                showLoginError();
+                showLoginErrorDialog();
             }
         });
     }
 
     /**
-     * Processes result from Google Sign-In flow.
+     * Displays a dialog informing the user that their email is not verified.
+     */
+    private void showEmailNotVerifiedDialog() {
+        Dialog errorDialog = new Dialog(this);
+        errorDialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
+        errorDialog.setContentView(R.layout.dialog_login_error);
+        errorDialog.setCancelable(false);
+
+        if (errorDialog.getWindow() != null) {
+            errorDialog.getWindow().setBackgroundDrawableResource(android.R.color.transparent);
+            errorDialog.getWindow().setDimAmount(0.6f);
+            errorDialog.getWindow().setGravity(Gravity.CENTER);
+        }
+
+        TextView messageText = errorDialog.findViewById(R.id.error_message);
+        Button okButton = errorDialog.findViewById(R.id.error_ok_button);
+
+        messageText.setText("Opps! Please verify your email before signing in.");
+
+        okButton.setOnClickListener(v -> {
+            errorDialog.dismiss();
+        });
+
+        errorDialog.show();
+    }
+
+    /**
+     * Shows Lottie-based error dialog on incorrect login
+     */
+    private void showLoginErrorDialog() {
+        errorDialog = new Dialog(this);
+        errorDialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
+        errorDialog.setContentView(R.layout.dialog_login_error);
+        errorDialog.setCancelable(false);
+
+        if (errorDialog.getWindow() != null) {
+            errorDialog.getWindow().setBackgroundDrawableResource(android.R.color.transparent);
+            errorDialog.getWindow().setDimAmount(0.5f);
+            errorDialog.getWindow().setGravity(Gravity.CENTER);
+        }
+
+        Button okButton = errorDialog.findViewById(R.id.error_ok_button);
+        okButton.setOnClickListener(v -> errorDialog.dismiss());
+
+        errorDialog.show();
+    }
+
+    /**
+     * Handles the result of the Google Sign-In task and authenticates with Firebase.
      *
-     * @param task Google Sign-In task
+     * @param task Task containing the GoogleSignInAccount result.
      */
     private void handleGoogleSignInResult(@NonNull Task<GoogleSignInAccount> task) {
         try {
@@ -301,9 +380,9 @@ public class SignIn extends AppCompatActivity {
     }
 
     /**
-     * Authenticates Firebase using Facebook credentials.
+     * Handles Facebook access token and authenticates with Firebase.
      *
-     * @param token Facebook access token
+     * @param token The Facebook AccessToken received upon successful login.
      */
     private void handleFacebookAccessToken(AccessToken token) {
         AuthCredential credential = FacebookAuthProvider.getCredential(token.getToken());
@@ -318,9 +397,9 @@ public class SignIn extends AppCompatActivity {
     }
 
     /**
-     * Stores user info in Firestore and navigates to Dashboard.
+     * Saves user data to Firestore and navigates to the main application screen.
      *
-     * @param user The authenticated FirebaseUser
+     * @param user The authenticated FirebaseUser object.
      */
     private void saveUserAndNavigate(FirebaseUser user) {
         if (user == null) return;
@@ -332,8 +411,8 @@ public class SignIn extends AppCompatActivity {
         FirebaseFirestore.getInstance()
                 .collection("users")
                 .document(uid)
-                .set(new User(name, email, uid))
-                .addOnSuccessListener(unused -> navigateToDashboard())
+                .set(new userModel(name, email, uid))
+                .addOnSuccessListener(unused -> showSuccessAndNavigate())
                 .addOnFailureListener(e -> {
                     hideLoader();
                     Toast.makeText(this, "Firestore error: " + e.getMessage(), Toast.LENGTH_SHORT).show();
@@ -341,28 +420,54 @@ public class SignIn extends AppCompatActivity {
     }
 
     /**
-     * Navigates to the Dashboard screen and clears back stack.
+     * Shows a success dialog and navigates to the navbar activity after a delay.
      */
-    private void navigateToDashboard() {
+    private void showSuccessAndNavigate() {
         hideLoader();
-        Intent intent = new Intent(SignIn.this, navbar.class);
-        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-        startActivity(intent);
-        finish();
+        Dialog successDialog = new Dialog(this);
+        successDialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
+        successDialog.setContentView(R.layout.dialog_login_success);
+        successDialog.setCancelable(false);
+
+        if (successDialog.getWindow() != null) {
+            successDialog.getWindow().setBackgroundDrawableResource(android.R.color.transparent);
+            successDialog.getWindow().setDimAmount(0.6f);
+            successDialog.getWindow().setGravity(Gravity.CENTER);
+        }
+
+        successDialog.show();
+
+        new Handler().postDelayed(() -> {
+            successDialog.dismiss();
+            Intent intent = new Intent(SignIn.this, navbar.class);
+            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+            startActivity(intent);
+            finish();
+        }, 2000);
     }
 
-    /** Shows the loader dialog */
+    /**
+     * Displays the loading dialog.
+     */
     private void showLoader() {
+
         if (!loaderDialog.isShowing()) loaderDialog.show();
     }
 
-    /** Hides the loader dialog */
+    /**
+     * Hides the loading dialog.
+     */
     private void hideLoader() {
+
         if (loaderDialog.isShowing()) loaderDialog.dismiss();
     }
 
     /**
-     * Required override for Facebook login result callback.
+     * Handles the result from external activities (e.g., Facebook Login).
+     *
+     * @param requestCode The request code originally supplied to startActivityForResult.
+     * @param resultCode  The result code returned by the child activity.
+     * @param data        An Intent containing the result data.
      */
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
@@ -371,7 +476,7 @@ public class SignIn extends AppCompatActivity {
     }
 
     /**
-     * Validates email format and shows error if invalid.
+     * Validates the email input and provides real-time feedback.
      */
     private void validateEmail() {
         String email = emailInput.getText().toString().trim();
@@ -391,7 +496,7 @@ public class SignIn extends AppCompatActivity {
     }
 
     /**
-     * Validates that the password field is not empty.
+     * Validates the password input and provides feedback.
      */
     private void validatePassword() {
         String password = passwordInput.getText().toString().trim();
@@ -403,7 +508,7 @@ public class SignIn extends AppCompatActivity {
     }
 
     /**
-     * Toggles password field visibility and icon.
+     * Toggles the visibility of the password input field.
      */
     private void togglePasswordVisibility() {
         if (isPasswordVisible) {
@@ -418,39 +523,37 @@ public class SignIn extends AppCompatActivity {
     }
 
     /**
-     * Enables or disables the login button based on input state.
+     * Updates the state of the login button based on input field contents.
      */
     private void updateLoginButtonState() {
         boolean enable = !emailInput.getText().toString().trim().isEmpty()
                 && !passwordInput.getText().toString().trim().isEmpty();
+
         signInButton.setEnabled(enable);
-        signInButton.setBackgroundTintList(ContextCompat.getColorStateList(this, enable ? R.color.black : R.color.grey_light));
-        signInButton.setTextColor(ContextCompat.getColor(this, enable ? R.color.white : R.color.grey));
+        signInButton.setBackgroundResource(R.drawable.rounded_btn_selector);
+        signInText.setTextColor(ContextCompat.getColor(this, enable ? R.color.white : R.color.grey));
     }
 
-    /**
-     * Shows red error styling and message for failed login.
-     */
-    private void showLoginError() {
-        loginErrorContainer.setVisibility(View.VISIBLE);
-        loginErrorTitle.setText(R.string.error_login_title);
-        loginErrorDescription.setText(R.string.error_login_description);
-        emailInputLayout.setBoxStrokeColor(ContextCompat.getColor(this, R.color.red));
-        passwordInputLayout.setBoxStrokeColor(ContextCompat.getColor(this, R.color.red));
-    }
 
     /**
-     * Shows error text and red border on input field.
+     * Displays an error message with a red border on the input layout.
+     *
+     * @param layout    The TextInputLayout to show error on.
+     * @param errorView The TextView for showing the error message.
+     * @param message   The error message to display.
      */
     private void showError(TextInputLayout layout, TextView errorView, String message) {
-        layout.setBoxStrokeColor(ContextCompat.getColor(this, R.color.red));
+        layout.setBoxStrokeColor(ContextCompat.getColor(this, R.color.dark_red));
         errorView.setText(message);
-        errorView.setTextColor(ContextCompat.getColor(this, R.color.red));
+        errorView.setTextColor(ContextCompat.getColor(this, R.color.dark_red));
         errorView.setVisibility(View.VISIBLE);
     }
 
     /**
-     * Clears validation error visuals on input field.
+     * Clears any existing error message from the input layout.
+     *
+     * @param layout    The TextInputLayout to clear error from.
+     * @param errorView The associated TextView for the error.
      */
     private void clearError(TextInputLayout layout, TextView errorView) {
         layout.setBoxStrokeColor(ContextCompat.getColor(this, R.color.grey));
@@ -458,7 +561,9 @@ public class SignIn extends AppCompatActivity {
     }
 
     /**
-     * Shows a green check icon for valid input.
+     * Shows a green check icon in the input layout indicating valid input.
+     *
+     * @param layout The TextInputLayout to show the icon in.
      */
     private void showValidIcon(TextInputLayout layout) {
         layout.setEndIconMode(TextInputLayout.END_ICON_CUSTOM);
@@ -467,7 +572,7 @@ public class SignIn extends AppCompatActivity {
     }
 
     /**
-     * Hides keyboard and clears input focus.
+     * Hides the keyboard and removes focus from the current input field.
      */
     private void hideKeyboardAndClearFocus() {
         View view = getCurrentFocus();
@@ -479,7 +584,10 @@ public class SignIn extends AppCompatActivity {
     }
 
     /**
-     * Dismisses keyboard when tapping outside of text fields.
+     * Handles touch events to dismiss keyboard when tapping outside input fields.
+     *
+     * @param event The MotionEvent being dispatched.
+     * @return true if the event was handled, false otherwise.
      */
     @Override
     public boolean dispatchTouchEvent(MotionEvent event) {

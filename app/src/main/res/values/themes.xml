@@ -1,18 +1,18 @@
-<resources xmlns:tools="http://schemas.android.com/tools">
+<resources>
 
     <!-- Base Theme -->
     <style name="Base.Theme.GenAIExpenseTracker" parent="Theme.Material3.DayNight.NoActionBar">
-        <!-- Primary Colors -->
-        <item name="colorOnPrimary">@color/white</item>
-        <!-- Secondary Colors -->
-        <item name="colorOnSecondary">@color/white</item>
-        <!-- Floating Hint Fix -->
-        <item name="colorOnSurfaceVariant">@color/grey</item>
-        <!-- Status bar and background -->
-        <item name="android:statusBarColor">@color/my_primary</item>
-        <item name="android:windowBackground">@color/white</item>
-        <!-- Optional: disable elevation overlay for flat look -->
-        <item name="materialThemeOverlay">@style/ThemeOverlay.Material3</item>
+        <!-- Disable the default ripple highlight -->
+        <item name="colorControlHighlight">@android:color/transparent</item>
+        <item name="materialThemeOverlay">@null</item>
+
+        <item name="colorControlNormal">@android:color/black</item>
+        <item name="android:tint">@null</item> <!-- avoid gray overlays -->
+
+        <!-- Prevent background & foreground blending -->
+        <item name="colorSurface">@android:color/white</item>
+        <item name="colorOnSurface">@android:color/black</item>
+
     </style>
 
     <!-- App Theme (used in AndroidManifest) -->
