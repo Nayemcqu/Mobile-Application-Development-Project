@@ -1,9 +1,9 @@
 <component name="libraryTable">
   <library name="Gradle: com.facebook.android:facebook-core:18.0.3@aar" external-system-id="GRADLE">
     <CLASSES>
-      <root url="jar://$USER_HOME$/.gradle/caches/8.11.1/transforms/99563c6a52d939126cca89992d4d85cc/transformed/facebook-core-18.0.3/jars/classes.jar!/" />
-      <root url="file://$USER_HOME$/.gradle/caches/8.11.1/transforms/99563c6a52d939126cca89992d4d85cc/transformed/facebook-core-18.0.3/res" />
-      <root url="file://$USER_HOME$/.gradle/caches/8.11.1/transforms/99563c6a52d939126cca89992d4d85cc/transformed/facebook-core-18.0.3/AndroidManifest.xml" />
+      <root url="file://$USER_HOME$/.gradle/caches/8.11.1/transforms/9f1c64fcf172417f5f21f2deda932ceb/transformed/facebook-core-18.0.3/AndroidManifest.xml" />
+      <root url="jar://$USER_HOME$/.gradle/caches/8.11.1/transforms/9f1c64fcf172417f5f21f2deda932ceb/transformed/facebook-core-18.0.3/jars/classes.jar!/" />
+      <root url="file://$USER_HOME$/.gradle/caches/8.11.1/transforms/9f1c64fcf172417f5f21f2deda932ceb/transformed/facebook-core-18.0.3/res" />
     </CLASSES>
     <JAVADOC>
       <root url="jar://$USER_HOME$/.gradle/caches/modules-2/files-2.1/com.facebook.android/facebook-core/18.0.3/3b7e8a123f6938760ab908ea14da289e459f5ccb/facebook-core-18.0.3-javadoc.jar!/" />

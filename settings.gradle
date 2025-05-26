@@ -1,23 +1,36 @@
+// settings.gradle
+
+// Configure plugin management repositories for resolving Gradle plugins
 pluginManagement {
     repositories {
+        // Google's Maven repository (Android libraries, Firebase, Gemini, etc.)
         google {
             content {
+                // Include only relevant groups for performance and security
                 includeGroupByRegex("com\\.android.*")
                 includeGroupByRegex("com\\.google.*")
                 includeGroupByRegex("androidx.*")
             }
         }
+        // Maven Central repository (for most open-source Java/Kotlin libraries)
         mavenCentral()
+        // Gradle Plugin Portal (for resolving Gradle plugins)
         gradlePluginPortal()
     }
 }
+
+// Configure dependency resolution for all modules in the project
 dependencyResolutionManagement {
+    // Disallow individual modules from declaring their own repositories
     repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
+
     repositories {
-        google()
-        mavenCentral()
-        maven { url 'https://jitpack.io' }
+        google()         // Google Maven repo
+        mavenCentral()   // Central repo
+        maven { url 'https://jitpack.io' } // Optional: JitPack for GitHub-based libraries
     }
 }
+
+// Name of the root project and included modules
 rootProject.name = "GenAIExpenseTracker"
 include ':app'

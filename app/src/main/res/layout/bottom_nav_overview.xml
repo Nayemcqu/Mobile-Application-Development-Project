@@ -7,7 +7,7 @@
     android:orientation="vertical">
 
     <!-- Custom Bar Chart Section -->
-    <com.cqu.genaiexpensetracker.customviews.BarChartView
+    <com.cqu.genaiexpensetracker.month.BarChartView
         android:id="@+id/customBarChart"
         android:layout_width="match_parent"
         android:layout_height="270dp"

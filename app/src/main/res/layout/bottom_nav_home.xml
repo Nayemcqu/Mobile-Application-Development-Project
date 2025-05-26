@@ -196,23 +196,23 @@
                         android:id="@+id/alert_message"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_marginTop="4dp"
-                        android:fontFamily="@font/arial_regular"
-                        android:text="High Spendings!"
+                        android:text=""
+                        android:layout_marginEnd="12dp"
                         android:textColor="#737373"
-                        android:textSize="14.2sp" />
+                        android:textSize="12sp"
+                        android:fontFamily="@font/montserrat_regular" />
                 </LinearLayout>
 
                 <TextView
                     android:id="@+id/alert_count"
                     android:layout_width="24dp"
                     android:layout_height="24dp"
-                    android:layout_marginStart="8dp"
+                    android:text=""
                     android:background="@drawable/red_circle"
                     android:gravity="center"
-                    android:text="2"
                     android:textColor="@android:color/white"
                     android:textSize="14sp" />
+
             </LinearLayout>
 
             <!-- Divider Line -->
@@ -251,21 +251,21 @@
                         android:id="@+id/advice_message"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_marginTop="4dp"
-                        android:fontFamily="@font/arial_regular"
-                        android:text="Adjust your spends on food"
+                        android:text=""
+                        android:layout_marginEnd="12dp"
                         android:textColor="#737373"
-                        android:textSize="14.2sp" />
+                        android:textSize="12sp"
+                        android:fontFamily="@font/montserrat_regular" />
+
                 </LinearLayout>
 
                 <TextView
                     android:id="@+id/advice_count"
                     android:layout_width="24dp"
                     android:layout_height="24dp"
-                    android:layout_marginStart="8dp"
+                    android:text=""
                     android:background="@drawable/green_circle"
                     android:gravity="center"
-                    android:text="2"
                     android:textColor="@android:color/white"
                     android:textSize="14sp" />
             </LinearLayout>
