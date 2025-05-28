@@ -1,7 +1,5 @@
 package com.cqu.genaiexpensetracker.expense;
 
-import com.cqu.genaiexpensetracker.ai_insights.InsightAnalyzer;
-
 import android.app.Activity;
 import android.app.DatePickerDialog;
 import android.content.Context;
@@ -30,6 +28,8 @@ import androidx.fragment.app.Fragment;
 
 import com.cqu.genaiexpensetracker.R;
 import com.google.android.material.button.MaterialButton;
+import com.google.android.material.snackbar.Snackbar;
+import com.google.firebase.Timestamp;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.storage.FirebaseStorage;
@@ -38,30 +38,37 @@ import com.google.firebase.storage.StorageReference;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.Locale;
+import java.util.Map;
 import java.util.Objects;
 
 /**
  * Fragment for adding a new expense entry.
- * Includes inputs for amount, category, optional note, and receipt upload.
+ * Allows:
+ * - Amount input
+ * - Category selection
+ * - Date selection via calendar
+ * - Optional note and receipt upload
+ * Stores to Firestore under /users/{uid}/expenses with:
+ * - `createdAt`: UI-selected date
+ * - `timestamp`: same as `createdAt` (used by Firebase alert triggers)
  */
 public class addExpense extends Fragment {
 
-    // UI Components
     private EditText inputAmount, editTextDate, editTextNote;
     private Spinner spinnerCategory;
     private TextView receiptText;
     private LinearLayout uploadReceipt;
     private MaterialButton buttonSave;
 
-    // Firebase instances
     private FirebaseFirestore db;
     private FirebaseStorage storage;
     private FirebaseAuth auth;
 
-    // Optional receipt URI
     private Uri receiptUri;
-    // File picker launcher
+    private Calendar calendar;
+
     private final ActivityResultLauncher<Intent> filePickerLauncher = registerForActivityResult(
             new ActivityResultContracts.StartActivityForResult(),
             result -> {
@@ -72,21 +79,19 @@ public class addExpense extends Fragment {
                 }
             }
     );
-    // User-selected expense date (used as shown date only)
-    private Calendar calendar;
 
     @Nullable
     @Override
-    public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
+    public View onCreateView(@NonNull LayoutInflater inflater,
+                             @Nullable ViewGroup container,
+                             @Nullable Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.nav_menu_add_expense, container, false);
 
-        // Initialize Firebase
         db = FirebaseFirestore.getInstance();
         storage = FirebaseStorage.getInstance();
         auth = FirebaseAuth.getInstance();
         calendar = Calendar.getInstance();
 
-        // Bind UI elements
         inputAmount = view.findViewById(R.id.input_amount);
         editTextDate = view.findViewById(R.id.edit_text_date);
         editTextNote = view.findViewById(R.id.edit_text_note);
@@ -95,7 +100,6 @@ public class addExpense extends Fragment {
         uploadReceipt = view.findViewById(R.id.receipt_upload_box);
         buttonSave = view.findViewById(R.id.button_save_expense);
 
-        // Spinner setup
         ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(
                 requireContext(),
                 R.array.expense_categories,
@@ -104,25 +108,15 @@ public class addExpense extends Fragment {
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         spinnerCategory.setAdapter(adapter);
 
-        // Date picker
         editTextDate.setOnClickListener(v -> openDatePicker());
-
-        // File picker for receipt
-        uploadReceipt.setOnClickListener(v -> {
-            Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
-            intent.setType("image/*");
-            intent.addCategory(Intent.CATEGORY_OPENABLE);
-            filePickerLauncher.launch(intent);
-        });
-
-        // Save handler
+        uploadReceipt.setOnClickListener(v -> openFilePicker());
         buttonSave.setOnClickListener(v -> saveExpenseToFirestore());
 
         return view;
     }
 
     /**
-     * Opens a calendar dialog for selecting date.
+     * Opens the date picker dialog to let the user select an expense date.
      */
     private void openDatePicker() {
         Calendar now = Calendar.getInstance();
@@ -139,7 +133,17 @@ public class addExpense extends Fragment {
     }
 
     /**
-     * Extracts filename from URI using content resolver.
+     * Opens the image file picker for selecting receipt.
+     */
+    private void openFilePicker() {
+        Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
+        intent.setType("image/*");
+        intent.addCategory(Intent.CATEGORY_OPENABLE);
+        filePickerLauncher.launch(intent);
+    }
+
+    /**
+     * Gets the display file name from a Uri.
      */
     private String getFileName(Uri uri) {
         String result = null;
@@ -154,7 +158,7 @@ public class addExpense extends Fragment {
     }
 
     /**
-     * Validates fields and initiates upload or direct save.
+     * Validates input fields and triggers save logic.
      */
     private void saveExpenseToFirestore() {
         String amountText = inputAmount.getText().toString().trim();
@@ -163,11 +167,11 @@ public class addExpense extends Fragment {
             return;
         }
 
-        double amount = Double.parseDouble(amountText); // string to double parse
+        double amount = Double.parseDouble(amountText);
         String category = spinnerCategory.getSelectedItem().toString();
         String note = editTextNote.getText().toString();
         String time = new SimpleDateFormat("HH:mm", Locale.getDefault()).format(new Date());
-        Date createdAt = calendar.getTime();
+        Date createdAt = new Date(calendar.getTimeInMillis());
 
         if (TextUtils.isEmpty(editTextDate.getText().toString())) {
             editTextDate.setError("Date required");
@@ -186,35 +190,8 @@ public class addExpense extends Fragment {
         }
     }
 
-    @Override
-    public void onResume() {
-        super.onResume();
-        clearAllFields(); // Clears all inputs when fragment is resumed
-    }
-
-    private void clearAllFields() {
-        inputAmount.setText("");
-        editTextDate.setText("");
-        editTextNote.setText("");
-        spinnerCategory.setSelection(0);
-        receiptUri = null;
-        receiptText.setText("Choose file");
-
-        // Clear focus from all input fields
-        inputAmount.clearFocus();
-        editTextDate.clearFocus();
-        editTextNote.clearFocus();
-
-        // Hide the keyboard if any field was focused
-        View currentFocus = requireActivity().getCurrentFocus();
-        if (currentFocus != null) {
-            InputMethodManager imm = (InputMethodManager) requireActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
-            imm.hideSoftInputFromWindow(currentFocus.getWindowToken(), 0);
-        }
-    }
-
     /**
-     * Uploads receipt image to Firebase Storage.
+     * Uploads receipt image to Firebase Storage then saves expense.
      */
     private void uploadReceiptAndSaveData(double amount, String category, String time, String note, Date createdAt) {
         String userId = Objects.requireNonNull(auth.getCurrentUser()).getUid();
@@ -234,50 +211,68 @@ public class addExpense extends Fragment {
     }
 
     /**
-     * Saves the provided expense data to Firestore under /users/{uid}/expenses/
-     * and triggers AI insight generation after a successful save.
+     * Saves the final expense object to Firestore.
      *
-     * @param amount     The expense amount entered by the user.
-     * @param category   The selected category for the expense.
-     * @param time       The time of entry in HH:mm format.
-     * @param note       An optional note for this expense.
-     * @param receiptUrl The uploaded receipt image URL (nullable).
-     * @param createdAt  The selected date of the expense.
+     * @param amount     Expense amount
+     * @param category   Expense category
+     * @param time       Formatted time (HH:mm)
+     * @param note       Optional note
+     * @param receiptUrl Optional receipt image URL
+     * @param createdAt  Date selected by the user
      */
-    private void saveToFirestore(double amount, String category, String time, String note, String receiptUrl, Date createdAt) {
+    private void saveToFirestore(double amount, String category, String time, String note,
+                                 String receiptUrl, Date createdAt) {
+
         String userId = Objects.requireNonNull(auth.getCurrentUser()).getUid();
-        expenseModel expense = new expenseModel(category, amount, time, note, receiptUrl, createdAt);
+
+        // 👇 Use selected date for both createdAt and timestamp to trigger correct alerts
+        Timestamp createdTimestamp = new Timestamp(createdAt);     // For UI
+        Timestamp backendTimestamp = new Timestamp(createdAt);     // For Firebase Functions
+
+        Map<String, Object> expenseData = new HashMap<>();
+        expenseData.put("amount", amount);
+        expenseData.put("category", category);
+        expenseData.put("note", note);
+        expenseData.put("time", time);
+        expenseData.put("createdAt", createdTimestamp);
+        expenseData.put("timestamp", backendTimestamp);
+        expenseData.put("receiptUrl", receiptUrl);
 
         db.collection("users").document(userId).collection("expenses")
-                .add(expense)
+                .add(expenseData)
                 .addOnSuccessListener(ref -> {
-                    Toast.makeText(requireContext(), "Expense added", Toast.LENGTH_SHORT).show();
-
-                    // Trigger Gemini AI analysis
-                    new InsightAnalyzer().analyzeAndGenerate(null);
-
-                    // Reset all input fields
-                    receiptUri = null;
-                    receiptText.setText("Choose file");
-                    inputAmount.setText("");
-                    editTextDate.setText("");
-                    editTextNote.setText("");
-                    spinnerCategory.setSelection(0);
-
-                    // Navigate to Expense tab or fallback
-                    if (getActivity() != null) {
-                        View expenseTab = getActivity().findViewById(R.id.nav_home);
-                        if (expenseTab != null) {
-                            expenseTab.performClick();
-                        } else {
-                            requireActivity().getSupportFragmentManager()
-                                    .beginTransaction()
-                                    .replace(R.id.main_frame, new Expense())
-                                    .commit();
-                        }
-                    }
+                    Snackbar.make(requireView(), "Expense saved", Snackbar.LENGTH_SHORT).show();
+                    clearAllFields();
                 })
                 .addOnFailureListener(e ->
                         Toast.makeText(requireContext(), "Error saving expense", Toast.LENGTH_SHORT).show());
+    }
+
+    /**
+     * Clears form fields and resets focus.
+     */
+    private void clearAllFields() {
+        inputAmount.setText("");
+        editTextDate.setText("");
+        editTextNote.setText("");
+        spinnerCategory.setSelection(0);
+        receiptUri = null;
+        receiptText.setText("Choose file");
+
+        inputAmount.clearFocus();
+        editTextDate.clearFocus();
+        editTextNote.clearFocus();
+
+        View currentFocus = requireActivity().getCurrentFocus();
+        if (currentFocus != null) {
+            InputMethodManager imm = (InputMethodManager) requireActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
+            imm.hideSoftInputFromWindow(currentFocus.getWindowToken(), 0);
+        }
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        clearAllFields();
     }
 }

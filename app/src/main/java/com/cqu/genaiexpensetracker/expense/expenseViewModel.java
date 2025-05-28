@@ -60,19 +60,40 @@ public class expenseViewModel extends ViewModel {
                 });
     }
 
-
+    /**
+     * Returns the list of expenses for the current selected period (Week, Month, or 6 Months).
+     *
+     * @return LiveData containing a list of TransactionItem for the current period
+     */
     public LiveData<List<TransactionItem>> getThisPeriodExpenses() {
         return thisPeriodExpenses;
     }
 
+    /**
+     * Returns the list of expenses for the past period compared to the current filter.
+     *
+     * @return LiveData containing a list of TransactionItem for the past period
+     */
     public LiveData<List<TransactionItem>> getPastPeriodExpenses() {
         return pastPeriodExpenses;
     }
 
+    /**
+     * Returns the total expenses amount for the selected current period.
+     *
+     * @return LiveData containing the total expense as Double
+     */
     public LiveData<Double> getTotalExpenses() {
         return totalExpenses;
     }
 
+    /**
+     * Loads and filters the user's expenses from Firestore based on the given filter
+     * ("Weekly", "Monthly", or "6 Months"). Updates the LiveData for both current and
+     * past periods accordingly.
+     *
+     * @param filter The selected time range filter
+     */
     public void loadFilteredExpenses(String filter) {
         String uid = (auth.getCurrentUser() != null) ? auth.getCurrentUser().getUid() : null;
         if (uid == null) return;
@@ -154,7 +175,11 @@ public class expenseViewModel extends ViewModel {
             pastPeriodExpenses.setValue(new ArrayList<>());
         }
     }
-
+    /**
+     * Returns the formatted date range string for the current week (Monday to Sunday).
+     *
+     * @return String representing the current week's date range
+     */
     public String getThisWeekRange() {
         Calendar cal = Calendar.getInstance();
         cal.set(Calendar.DAY_OF_WEEK, Calendar.MONDAY);
@@ -162,7 +187,11 @@ public class expenseViewModel extends ViewModel {
         cal.add(Calendar.DAY_OF_YEAR, 6);
         return formatRange(start, cal.getTime());
     }
-
+    /**
+     * Returns the formatted date range string for the previous week (Monday to Sunday).
+     *
+     * @return String representing the last week's date range
+     */
     public String getLastWeekRange() {
         Calendar cal = Calendar.getInstance();
         cal.set(Calendar.DAY_OF_WEEK, Calendar.MONDAY);
@@ -171,7 +200,11 @@ public class expenseViewModel extends ViewModel {
         cal.add(Calendar.DAY_OF_YEAR, 6);
         return formatRange(start, cal.getTime());
     }
-
+    /**
+     * Returns the formatted date range string for the current month (start to current date).
+     *
+     * @return String representing the current month's date range
+     */
     public String getThisMonthRange() {
         Calendar cal = Calendar.getInstance();
         cal.set(Calendar.DAY_OF_MONTH, 1);
@@ -179,7 +212,11 @@ public class expenseViewModel extends ViewModel {
         cal = Calendar.getInstance();
         return formatRange(start, cal.getTime());
     }
-
+    /**
+     * Returns the formatted date range string for the previous calendar month.
+     *
+     * @return String representing the last month's date range
+     */
     public String getLastMonthRange() {
         Calendar cal = Calendar.getInstance();
         cal.add(Calendar.MONTH, -1);
@@ -188,18 +225,34 @@ public class expenseViewModel extends ViewModel {
         cal.set(Calendar.DAY_OF_MONTH, cal.getActualMaximum(Calendar.DAY_OF_MONTH));
         return formatRange(start, cal.getTime());
     }
-
+    /**
+     * Returns the formatted date range string for the last six months (from 6 months ago to today).
+     *
+     * @return String representing the last six months' date range
+     */
     public String getLastSixMonthRange() {
         Date start = getDateMonthsAgo(6);
         Date end = new Date();
         return formatRange(start, end);
     }
-
+    /**
+     * Formats a date range as a string (e.g., "01 Jan - 07 Jan").
+     *
+     * @param start Start date of the range
+     * @param end   End date of the range
+     * @return Formatted string representing the date range
+     */
     private String formatRange(Date start, Date end) {
         SimpleDateFormat sdf = new SimpleDateFormat("dd MMM", Locale.getDefault());
         return sdf.format(start) + " - " + sdf.format(end);
     }
 
+    /**
+     * Returns the Date object representing the day exactly 'monthsAgo' months before today.
+     *
+     * @param monthsAgo Number of months to go back
+     * @return Date object representing the past date
+     */
     private Date getDateMonthsAgo(int monthsAgo) {
         Calendar cal = Calendar.getInstance();
         cal.add(Calendar.MONTH, -monthsAgo);

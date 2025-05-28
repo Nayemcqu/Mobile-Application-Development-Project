@@ -79,6 +79,8 @@ public class navbar extends AppCompatActivity {
     private ImageView profileImage, iconAddPhoto;
     private TextView emailTextView;
     private Uri imageUri;
+    private TextView alertBadge;
+
 
     /**
      * Called when the activity is starting. Initializes drawer, bottom nav, and profile.
@@ -106,6 +108,10 @@ public class navbar extends AppCompatActivity {
         emailTextView = headerView.findViewById(R.id.profile_email);
         profileImage = headerView.findViewById(R.id.profile_image);
         iconAddPhoto = headerView.findViewById(R.id.icon_add_photo);
+
+        alertBadge = findViewById(R.id.alertBadge);
+
+        loadUnreadAlertCount();
 
         loadUserProfile();
         iconAddPhoto.setOnClickListener(v -> openFileChooser());
@@ -172,7 +178,7 @@ public class navbar extends AppCompatActivity {
         ImageView notificationIcon = findViewById(R.id.notificationIcon);
         notificationIcon.setOnClickListener(v -> {
             if ("NOTIFICATIONS".equals(currentFragmentTag)) {
-                // Already on notifications → go back to Home
+                // Already on notifications ---- go back to Home
                 currentFragmentTag = "HOME";
                 getSupportFragmentManager().beginTransaction()
                         .replace(R.id.main_frame, dashboard)
@@ -376,14 +382,22 @@ public class navbar extends AppCompatActivity {
                     }
                 });
     }
-
+    /**
+     * Programmatically simulates a click on the "Overview" tab in the bottom navigation bar
+     * to navigate the user to the Overview screen.
+     */
     public void navigateToOverview() {
         LinearLayout navOverview = findViewById(R.id.nav_overview);
         if (navOverview != null) {
             navOverview.performClick();
         }
     }
-
+    /**
+     * Navigates the user to the Add Income screen by:
+     * - Updating the screen title to "Add Income"
+     * - Resetting the bottom navigation highlight
+     * - Replacing the current fragment with the AddIncome fragment
+     */
     public void navigateToAddIncome() {
         // Update title
         titleText.setText("Add Income");
@@ -397,7 +411,12 @@ public class navbar extends AppCompatActivity {
                 .addToBackStack("AddIncome")
                 .commit();
     }
-
+    /**
+     * Navigates the user to the Add Expense screen by:
+     * - Updating the screen title to "Add Expense"
+     * - Resetting the bottom navigation highlight
+     * - Replacing the current fragment with the AddExpense fragment
+     */
     public void navigateToAddExpense() {
         // Update title
         titleText.setText("Add Expense");
@@ -410,6 +429,39 @@ public class navbar extends AppCompatActivity {
                 .replace(R.id.main_frame, new addExpense())
                 .addToBackStack("AddExpense")
                 .commit();
+    }
+
+    /**
+     * Attaches a real-time Firestore listener to track unread alert notifications.
+     * Updates the notification badge automatically when new alerts arrive or are read.
+     */
+    private void loadUnreadAlertCount() {
+        FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
+        if (user == null) return;
+
+        FirebaseFirestore.getInstance()
+                .collection("users")
+                .document(user.getUid())
+                .collection("insights")
+                .whereEqualTo("type", "Alert")
+                .whereEqualTo("read", false)
+                .addSnapshotListener((snapshot, e) -> {
+                    if (e != null) {
+                        alertBadge.setVisibility(View.GONE);
+                        return;
+                    }
+
+
+                    if (snapshot != null) {
+                        int unreadCount = snapshot.size();
+                        if (unreadCount > 0) {
+                            alertBadge.setText(String.valueOf(unreadCount));
+                            alertBadge.setVisibility(View.VISIBLE);
+                        } else {
+                            alertBadge.setVisibility(View.GONE);
+                        }
+                    }
+                });
     }
 
 }

@@ -29,6 +29,10 @@
     <color name="bar_value">#737373</color>
     <color name="axis_value">#040606</color>
 
+    <color name="alert_red">#da3f2a</color>
+    <color name="advice_green">#4CAF50</color>
+
+
     <!-- ======= App Theme Colors ======= -->
     <color name="app_theme">#009dff</color> <!-- Primary brand blue -->
     <color name="app_theme_light">#f6fbff</color> <!-- Light variant of app theme -->

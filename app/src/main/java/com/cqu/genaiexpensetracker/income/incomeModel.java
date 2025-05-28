@@ -42,43 +42,94 @@ public class incomeModel {
     // Getter and Setter methods
     // --------------------
 
+    /**
+     * Returns the expense amount.
+     *
+     * @return The amount of the transaction.
+     */
     public double getAmount() {
         return amount;
     }
 
+    /**
+     * Sets the expense amount.
+     *
+     * @param amount The amount to set for the transaction.
+     */
     public void setAmount(double amount) {
         this.amount = amount;
     }
 
+    /**
+     * Returns the source of income or expense (e.g., salary, food, rent).
+     *
+     * @return The source/category of the transaction.
+     */
     public String getSource() {
         return source;
     }
 
+    /**
+     * Sets the source of income or expense.
+     *
+     * @param source The source or category to assign.
+     */
     public void setSource(String source) {
         this.source = source;
     }
 
+    /**
+     * Returns the timestamp of when the transaction occurred.
+     *
+     * @return The timestamp of the transaction.
+     */
     public Timestamp getTimestamp() {
         return timestamp;
     }
 
+    /**
+     * Sets the timestamp for the transaction.
+     *
+     * @param timestamp The timestamp to set.
+     */
     public void setTimestamp(Timestamp timestamp) {
         this.timestamp = timestamp;
     }
 
+    /**
+     * Returns the additional note or description for the transaction.
+     *
+     * @return The note associated with the transaction.
+     */
     public String getNote() {
         return note;
     }
 
+    /**
+     * Sets the note or description for the transaction.
+     *
+     * @param note The note to assign.
+     */
     public void setNote(String note) {
         this.note = note;
     }
 
+    /**
+     * Returns the receipt URL if a receipt was uploaded.
+     *
+     * @return The URL of the uploaded receipt image or file.
+     */
     public String getReceiptUrl() {
         return receiptUrl;
     }
 
+    /**
+     * Sets the receipt URL for the transaction.
+     *
+     * @param receiptUrl The URL of the receipt to set.
+     */
     public void setReceiptUrl(String receiptUrl) {
         this.receiptUrl = receiptUrl;
     }
+
 }

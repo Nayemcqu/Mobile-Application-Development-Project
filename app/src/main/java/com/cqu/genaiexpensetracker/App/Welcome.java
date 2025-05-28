@@ -226,7 +226,7 @@ public class Welcome extends AppCompatActivity {
 
         TextView errorMessage = errorDialog.findViewById(R.id.error_message);
         if (errorMessage != null) {
-            // dynamically set your error text
+            // dynamically set error text
             errorMessage.setText(message);
         }
 

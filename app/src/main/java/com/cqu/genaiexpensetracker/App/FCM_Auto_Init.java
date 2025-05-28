@@ -13,7 +13,7 @@ public class FCM_Auto_Init extends Application {
         // Enable Firebase Cloud Messaging auto-init
         FirebaseMessaging.getInstance().setAutoInitEnabled(true);
 
-        // Optional: log FCM token (for debug)
+        // log FCM token (for debug)
         FirebaseMessaging.getInstance().getToken()
                 .addOnCompleteListener(task -> {
                     if (task.isSuccessful()) {

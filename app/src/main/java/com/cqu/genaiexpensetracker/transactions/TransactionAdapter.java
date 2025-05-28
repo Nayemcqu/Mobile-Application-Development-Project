@@ -90,11 +90,22 @@ public class TransactionAdapter extends RecyclerView.Adapter<TransactionAdapter.
         }
     }
 
+    /**
+     * Returns the total number of items in the transaction list.
+     *
+     * @return The size of the transaction list.
+     */
     @Override
     public int getItemCount() {
         return transactionList.size();
     }
 
+    /**
+     * Updates the adapter's data set with a new list of transactions
+     * and refreshes the RecyclerView.
+     *
+     * @param newList The new list of {@link TransactionItem} to display.
+     */
     public void updateData(List<TransactionItem> newList) {
         transactionList.clear();
         transactionList.addAll(newList);
@@ -108,6 +119,11 @@ public class TransactionAdapter extends RecyclerView.Adapter<TransactionAdapter.
         ImageView icon;
         TextView title, time, amount;
 
+        /**
+         * ViewHolder constructor that initializes the views for a single transaction item.
+         *
+         * @param itemView The root view of the transaction item layout.
+         */
         public TransactionViewHolder(@NonNull View itemView) {
             super(itemView);
             icon = itemView.findViewById(R.id.category_icon);

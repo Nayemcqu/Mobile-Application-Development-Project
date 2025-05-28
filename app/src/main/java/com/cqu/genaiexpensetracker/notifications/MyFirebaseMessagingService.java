@@ -22,55 +22,49 @@ import com.google.firebase.messaging.RemoteMessage;
 import java.util.Map;
 
 /**
- * Handles incoming FCM messages and displays system notifications.
- * Dynamically updates icons/messages based on the type (Alert or Advice).
+ * Firebase Messaging Service to receive FCM alert-type messages.
+ * - Displays modern notifications when an alert is received
+ * - Redirects to Notifications screen
+ * - Saves FCM token to Firestore on refresh
  */
 public class MyFirebaseMessagingService extends FirebaseMessagingService {
 
     private static final String TAG = "FCM_Service";
     private static final String CHANNEL_ID = "ai_insight_channel";
 
+    /**
+     * Handles incoming FCM alert messages.
+     */
     @Override
     public void onMessageReceived(@NonNull RemoteMessage remoteMessage) {
         super.onMessageReceived(remoteMessage);
         Log.d(TAG, "FCM Message received: " + remoteMessage.getData());
 
-        // Default values
-        String title = "AI Insight";
-        String message = "You have a new financial insight!";
-        String type = "Advice";  // Default type
-        int iconResId = R.drawable.ic_stat_advice;
+        String title = "Financial Alert";
+        String message = "You have a new financial alert.";
+        int iconResId = R.drawable.ic_stat_alert;
 
-        // Extract notification payload (if available)
+        // Override with payload (if present)
         if (remoteMessage.getNotification() != null) {
             title = remoteMessage.getNotification().getTitle();
             message = remoteMessage.getNotification().getBody();
         }
 
-        // Extract data payload
         Map<String, String> data = remoteMessage.getData();
-        if (data.containsKey("type")) {
-            type = data.get("type");
-        }
-        if (data.containsKey("message")) {
-            message = data.get("message");
+        if ("Alert".equalsIgnoreCase(data.get("type"))) {
+            title = "Financial Alert";
+            iconResId = R.drawable.ic_stat_alert;
         }
 
-        // Determine icon and message based on type
-        if ("Alerts".equalsIgnoreCase(type)) {
-            iconResId = R.drawable.ic_stat_alert;
-            title = "Financial Alert";
-        } else if ("Advice".equalsIgnoreCase(type)) {
-            iconResId = R.drawable.ic_stat_advice;
-            title = "Financial Advice";
+        if (data.containsKey("message")) {
+            message = data.get("message");
         }
 
         sendNotification(title, message, iconResId);
     }
 
     /**
-     * Displays a system notification with the given title, message, and icon.
-     * Navigates to Notifications screen when tapped.
+     * Builds and shows the alert notification.
      */
     private void sendNotification(String title, String message, int iconResId) {
         Intent intent = new Intent(this, navbar.class);
@@ -100,34 +94,34 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             NotificationChannel channel = new NotificationChannel(
                     CHANNEL_ID,
-                    "AI Insight Notifications",
+                    "AI Alert Notifications",
                     NotificationManager.IMPORTANCE_HIGH
             );
-            channel.setDescription("Get alerts and advice from your financial AI assistant.");
+            channel.setDescription("Receive financial alerts based on income and spending.");
             manager.createNotificationChannel(channel);
         }
 
-        manager.notify((int) System.currentTimeMillis(), builder.build()); // unique ID per notification
+        manager.notify((int) System.currentTimeMillis(), builder.build());
     }
 
+    /**
+     * Saves the new FCM token to Firestore for the signed-in user.
+     */
     @Override
     public void onNewToken(@NonNull String token) {
         super.onNewToken(token);
         Log.d(TAG, "FCM token refreshed: " + token);
 
-        // Save to Firestore if user is logged in
         if (FirebaseAuth.getInstance().getCurrentUser() != null) {
             String uid = FirebaseAuth.getInstance().getCurrentUser().getUid();
-
             FirebaseFirestore.getInstance()
                     .collection("users")
                     .document(uid)
                     .update("fcmToken", token)
-                    .addOnSuccessListener(aVoid -> Log.d(TAG, "FCM token updated in Firestore"))
-                    .addOnFailureListener(e -> Log.e(TAG, "Failed to update FCM token", e));
+                    .addOnSuccessListener(aVoid ->
+                            Log.d(TAG, "FCM token updated in Firestore"))
+                    .addOnFailureListener(e ->
+                            Log.e(TAG, "Failed to update FCM token", e));
         }
     }
-
-
-
 }

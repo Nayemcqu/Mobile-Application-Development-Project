@@ -18,30 +18,25 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.airbnb.lottie.LottieAnimationView;
 import com.cqu.genaiexpensetracker.R;
-import com.cqu.genaiexpensetracker.ai_insights.AiInsightService.AiCallback;
-import com.cqu.genaiexpensetracker.ai_insights.InsightAnalyzer;
 import com.cqu.genaiexpensetracker.navbar.navbar;
 import com.cqu.genaiexpensetracker.transactions.TransactionAdapter;
 import com.cqu.genaiexpensetracker.transactions.TransactionItem;
 import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.Query;
 
-import org.json.JSONObject;
-
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
-import java.util.Objects;
-import java.util.concurrent.atomic.AtomicInteger;
 
-import okhttp3.Call;
-import okhttp3.Callback;
-import okhttp3.OkHttpClient;
-import okhttp3.Request;
-import okhttp3.Response;
-
+/**
+ * Dashboard Fragment (Home)
+ *
+ * Responsibilities:
+ * - Displays total balance, income, expense
+ * - Shows most recent Firebase alert summary (auto-triggered)
+ * - Shows recent transactions (past 7 days)
+ */
 public class Dashboard extends Fragment {
 
     private final List<TransactionItem> transactionList = new ArrayList<>();
@@ -51,11 +46,7 @@ public class Dashboard extends Fragment {
     private DashboardViewModel viewModel;
 
     private TextView totalBalanceText, incomeText, expenseText;
-    private TextView alertCount, alertMessage, adviceCount, adviceMessage;
-
-    private boolean incomeLoaded = false;
-    private boolean expenseLoaded = false;
-    private boolean transactionsLoaded = false;
+    private TextView alertCount, alertMessage, alertTitle;
 
     public Dashboard() {}
 
@@ -66,7 +57,7 @@ public class Dashboard extends Fragment {
                              @Nullable Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.bottom_nav_home, container, false);
 
-        // Bind UI
+        // Bind UI elements
         recyclerView = view.findViewById(R.id.transactions_recycler_view);
         emptyAnimation = view.findViewById(R.id.empty_transactions_animation);
         recyclerView.setLayoutManager(new LinearLayoutManager(requireContext()));
@@ -78,16 +69,15 @@ public class Dashboard extends Fragment {
         expenseText = view.findViewById(R.id.expense_amount);
         alertCount = view.findViewById(R.id.alert_count);
         alertMessage = view.findViewById(R.id.alert_message);
-        adviceCount = view.findViewById(R.id.advice_count);
-        adviceMessage = view.findViewById(R.id.advice_message);
+        alertTitle = view.findViewById(R.id.alert_title); // make sure this exists in layout
 
-        TextView seeAll = view.findViewById(R.id.see_all);
-        seeAll.setOnClickListener(v -> {
+        view.findViewById(R.id.see_all).setOnClickListener(v -> {
             if (getActivity() instanceof navbar) {
                 ((navbar) getActivity()).navigateToOverview();
             }
         });
 
+        // Set up ViewModel observers
         viewModel = new ViewModelProvider(this).get(DashboardViewModel.class);
 
         viewModel.getTransactions().observe(getViewLifecycleOwner(), items -> {
@@ -101,129 +91,100 @@ public class Dashboard extends Fragment {
                 recyclerView.setVisibility(View.GONE);
             }
             adapter.notifyDataSetChanged();
-            transactionsLoaded = true;
-            triggerInsightAnalysisIfReady();
         });
 
         viewModel.getTotalIncome().observe(getViewLifecycleOwner(), income -> {
             incomeText.setText(String.format(Locale.getDefault(), "$%.2f", income));
-            incomeLoaded = true;
-            triggerInsightAnalysisIfReady();
         });
 
         viewModel.getTotalExpense().observe(getViewLifecycleOwner(), expense -> {
             expenseText.setText(String.format(Locale.getDefault(), "$%.2f", expense));
-            expenseLoaded = true;
-            triggerInsightAnalysisIfReady();
         });
 
         viewModel.getBalance().observe(getViewLifecycleOwner(), balance -> {
-            if (balance < 0) {
-                totalBalanceText.setText(String.format(Locale.getDefault(), "-$%.2f", Math.abs(balance)));
-                totalBalanceText.setTextColor(ContextCompat.getColor(requireContext(), R.color.negative_balance));
-            } else {
-                totalBalanceText.setText(String.format(Locale.getDefault(), "$%.2f", balance));
-                totalBalanceText.setTextColor(Color.WHITE);
-            }
+            totalBalanceText.setText(String.format(Locale.getDefault(), balance < 0 ? "-$%.2f" : "$%.2f", Math.abs(balance)));
+            totalBalanceText.setTextColor(
+                    balance < 0
+                            ? ContextCompat.getColor(requireContext(), R.color.negative_balance)
+                            : Color.WHITE
+            );
         });
 
         viewModel.loadTransactions();
+        listenToRealtimeAlerts(); // alerts and advice update in real-time
+
         return view;
     }
 
     /**
-     * Wait until all income/expense/transactions loaded before running Gemini + Firestore.
+     * Sets up a real-time Firestore listener on the user's "insights" collection,
+     * filtered by type ("Alert" or "Advice"). Updates the dashboard UI with the
+     * latest insight and count whenever data changes.
      */
-    private void triggerInsightAnalysisIfReady() {
-        if (incomeLoaded && expenseLoaded && transactionsLoaded) {
-            if (FirebaseAuth.getInstance().getCurrentUser() != null) {
-                Log.d("Dashboard", "Triggering insight for UID: " +
-                        FirebaseAuth.getInstance().getCurrentUser().getUid());
+    private void listenToRealtimeAlerts() {
+        String uid = FirebaseAuth.getInstance().getCurrentUser().getUid();
 
-                // Automatically reload insights after Gemini finishes
-                new InsightAnalyzer().analyzeAndGenerate(this::loadAiInsights);
+        FirebaseFirestore.getInstance()
+                .collection("users")
+                .document(uid)
+                .collection("insights")
+                .whereIn("type", List.of("Alert", "Advice"))
+                .orderBy("timestamp", Query.Direction.DESCENDING)
+                .addSnapshotListener((snapshot, e) -> {
+                    if (!isAdded() || e != null || snapshot == null) {
+                        updateAlertUI(0, "No alerts found.", "Alert");
+                        return;
+                    }
 
-            } else {
-                Log.e("Dashboard", "User not signed in. Skipping insight generation.");
-            }
+                    // Get total alert and advice counts separately
+                    int alertCountTotal = 0;
+                    int adviceCountTotal = 0;
+
+                    for (var doc : snapshot.getDocuments()) {
+                        String type = doc.getString("type");
+                        if ("Alert".equalsIgnoreCase(type)) alertCountTotal++;
+                        else if ("Advice".equalsIgnoreCase(type)) adviceCountTotal++;
+                    }
+
+                    String latestMsg = "No alerts found.";
+                    String type = "Alert";
+                    int finalCount = 0;
+
+                    if (!snapshot.isEmpty()) {
+                        String title = snapshot.getDocuments().get(0).getString("title");
+                        String message = snapshot.getDocuments().get(0).getString("message");
+                        type = snapshot.getDocuments().get(0).getString("type");
+
+                        latestMsg = title + ": " + message;
+                        finalCount = "Advice".equalsIgnoreCase(type) ? adviceCountTotal : alertCountTotal;
+                    }
+
+                    updateAlertUI(finalCount, latestMsg, type);
+                });
+    }
+
+    /**
+     * Updates the alert badge and message area based on insight type (Alert or Advice).
+     *
+     * @param count      total number of insights
+     * @param message    latest alert/advice message
+     * @param type       insight type: "Alert" or "Advice"
+     */
+    private void updateAlertUI(int count, String message, String type) {
+        if (!isAdded()) return;
+
+        alertCount.setText(String.valueOf(count));
+        alertMessage.setText(!message.isEmpty() ? message : "No alerts found.");
+
+        if ("Advice".equalsIgnoreCase(type)) {
+            alertTitle.setText("ADVICE");
+            alertTitle.setTextColor(ContextCompat.getColor(requireContext(), R.color.advice_green));
+            alertCount.setBackgroundResource(R.drawable.dot_green);
+        } else {
+            alertTitle.setText("ALERTS");
+            alertTitle.setTextColor(ContextCompat.getColor(requireContext(), R.color.alert_red));
+            alertCount.setBackgroundResource(R.drawable.dot_red);
         }
     }
 
-    /**
-     * Loads latest alert & advice and their total counts.
-     */
-    private void loadAiInsights() {
-        String uid = Objects.requireNonNull(FirebaseAuth.getInstance().getCurrentUser()).getUid();
-        String latestUrl = "https://api-7carwvirja-uc.a.run.app/latest-insights/" + uid;
-
-        OkHttpClient client = new OkHttpClient();
-        Request request = new Request.Builder().url(latestUrl).build();
-
-        client.newCall(request).enqueue(new Callback() {
-            @Override
-            public void onFailure(@NonNull Call call, @NonNull IOException e) {
-                Log.e("Dashboard", "Failed to fetch AI insights", e);
-                if (!isAdded()) return;
-                requireActivity().runOnUiThread(() -> updateAiUi(0, "", 0, ""));
-            }
-
-            @Override
-            public void onResponse(@NonNull Call call, @NonNull Response response) throws IOException {
-                if (!response.isSuccessful()) {
-                    Log.e("Dashboard", "Non-200 response from insights API: " + response.code());
-                    requireActivity().runOnUiThread(() -> updateAiUi(0, "", 0, ""));
-                    return;
-                }
-
-                String responseBody = response.body() != null ? response.body().string() : "";
-                try {
-                    JSONObject json = new JSONObject(responseBody);
-                    JSONObject alert = json.optJSONObject("alert");
-                    JSONObject advice = json.optJSONObject("advice");
-
-                    String alertTitle = (alert != null) ? alert.optString("title", "") : "";
-                    String alertMsg = (alert != null) ? alert.optString("message", "") : "";
-
-                    String adviceTitle = (advice != null) ? advice.optString("title", "") : "";
-                    String adviceMsg = (advice != null) ? advice.optString("message", "") : "";
-
-                    String finalAlertMsg = (!alertTitle.isEmpty() ? alertTitle + ": " : "") + alertMsg;
-                    String finalAdviceMsg = (!adviceTitle.isEmpty() ? adviceTitle + ": " : "") + adviceMsg;
-
-                    FirebaseFirestore db = FirebaseFirestore.getInstance();
-                    db.collection("users").document(uid).collection("insights")
-                            .get().addOnSuccessListener(snapshot -> {
-                                AtomicInteger totalAlerts = new AtomicInteger(0);
-                                AtomicInteger totalAdvice = new AtomicInteger(0);
-                                for (DocumentSnapshot doc : snapshot) {
-                                    String type = doc.getString("type");
-                                    if ("Alert".equalsIgnoreCase(type)) totalAlerts.incrementAndGet();
-                                    else if ("Advice".equalsIgnoreCase(type)) totalAdvice.incrementAndGet();
-                                }
-
-                                requireActivity().runOnUiThread(() ->
-                                        updateAiUi(totalAlerts.get(), finalAlertMsg, totalAdvice.get(), finalAdviceMsg));
-                            })
-                            .addOnFailureListener(e -> {
-                                Log.e("Dashboard", "Failed to count insights", e);
-                                requireActivity().runOnUiThread(() -> updateAiUi(0, "", 0, ""));
-                            });
-
-                } catch (Exception e) {
-                    Log.e("Dashboard", "JSON parse error", e);
-                    requireActivity().runOnUiThread(() -> updateAiUi(0, "", 0, ""));
-                }
-            }
-        });
-    }
-
-    /**
-     * Updates UI badges and messages for insights.
-     */
-    private void updateAiUi(int alertNum, String alertMsg, int adviceNum, String adviceMsg) {
-        alertCount.setText(String.valueOf(alertNum));
-        alertMessage.setText(!alertMsg.isEmpty() ? alertMsg : "No alerts found.");
-        adviceCount.setText(String.valueOf(adviceNum));
-        adviceMessage.setText(!adviceMsg.isEmpty() ? adviceMsg : "No new advice available.");
-    }
 }

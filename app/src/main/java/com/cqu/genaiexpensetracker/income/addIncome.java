@@ -1,7 +1,5 @@
 package com.cqu.genaiexpensetracker.income;
 
-import com.cqu.genaiexpensetracker.ai_insights.InsightAnalyzer;
-
 import android.app.Activity;
 import android.app.DatePickerDialog;
 import android.content.Context;
@@ -23,9 +21,10 @@ import android.widget.Toast;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 
-import com.cqu.genaiexpensetracker.dashboard.Dashboard;
 import com.cqu.genaiexpensetracker.R;
+import com.cqu.genaiexpensetracker.dashboard.Dashboard;
 import com.google.android.material.button.MaterialButton;
+import com.google.android.material.snackbar.Snackbar;
 import com.google.firebase.Timestamp;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
@@ -40,9 +39,14 @@ import java.util.Locale;
 import java.util.Map;
 
 /**
- * Fragment for adding a new income entry.
- * Users can input amount, source, date, note, and optionally upload a payslip.
- * Data is saved to Firestore and optionally uploaded to Firebase Storage.
+ * Fragment for adding a new income entry in the GenAI Expense Tracker app.
+ *
+ * Features:
+ * - Enter amount, source, note, and date
+ * - Upload optional payslip (PDF)
+ * - Saves income to Firestore under /users/{uid}/income/
+ * - `timestamp`: used by backend for AI alert logic
+ * - `createdAt`: used in UI for sorting/filtering
  */
 public class addIncome extends Fragment {
 
@@ -52,23 +56,21 @@ public class addIncome extends Fragment {
     private TextView textFilename;
     private ImageView uploadIcon, calendarIcon;
     private MaterialButton saveButton;
+
     private Uri fileUri;
     private Calendar selectedDate;
 
-    public addIncome() {
-        // Required empty public constructor
-    }
+    public addIncome() {}
 
     public static addIncome newInstance() {
         return new addIncome();
     }
 
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                             Bundle savedInstanceState) {
+    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.nav_menu_add_income, container, false);
 
-        // Initialize views
+        // Bind views
         inputAmount = view.findViewById(R.id.input_amount);
         inputCategory = view.findViewById(R.id.text_income_category);
         inputDate = view.findViewById(R.id.edit_text_date);
@@ -79,25 +81,25 @@ public class addIncome extends Fragment {
         saveButton = view.findViewById(R.id.button_save_income);
         selectedDate = Calendar.getInstance();
 
-        // File picker
-        uploadIcon.setOnClickListener(v -> openFileChooser());
-
-        // Calendar trigger from both icon and input field
+        // Date picker
         inputDate.setOnClickListener(v -> showDatePicker());
         calendarIcon.setOnClickListener(v -> showDatePicker());
 
-        // Save button click
+        // File picker
+        uploadIcon.setOnClickListener(v -> openFileChooser());
+
+        // Save button
         saveButton.setOnClickListener(v -> validateAndSave());
 
         return view;
     }
 
     /**
-     * Validates user input and initiates save process.
+     * Validates input fields and starts save process.
      */
     private void validateAndSave() {
         String amountStr = inputAmount.getText().toString().trim();
-        String category = inputCategory.getText().toString().trim();
+        String source = inputCategory.getText().toString().trim();
         String note = inputNote.getText().toString().trim();
         String dateStr = inputDate.getText().toString().trim();
 
@@ -105,19 +107,18 @@ public class addIncome extends Fragment {
             inputAmount.setError("Enter amount");
             return;
         }
-
-        if (TextUtils.isEmpty(category)) {
-            inputCategory.setError("Enter source");
+        if (TextUtils.isEmpty(source)) {
+            inputCategory.setError("Enter income source");
             return;
         }
-
         if (TextUtils.isEmpty(dateStr)) {
-            inputDate.setError("Choose date");
+            inputDate.setError("Select a date");
             return;
         }
 
         double amount = Double.parseDouble(amountStr);
-        Timestamp timestamp = new Timestamp(selectedDate.getTime());
+        Timestamp selectedTimestamp = new Timestamp(selectedDate.getTime());
+
         FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
         if (user == null) {
             Toast.makeText(getContext(), "User not authenticated", Toast.LENGTH_SHORT).show();
@@ -128,19 +129,16 @@ public class addIncome extends Fragment {
 
         if (fileUri != null) {
             uploadPayslip(fileUri, payslipUrl ->
-                    saveIncomeData(user.getUid(), db, amount, category, timestamp, note, payslipUrl));
+                    saveIncomeData(user.getUid(), db, amount, source, selectedTimestamp, note, payslipUrl));
         } else {
-            saveIncomeData(user.getUid(), db, amount, category, timestamp, note, null);
+            saveIncomeData(user.getUid(), db, amount, source, selectedTimestamp, note, null);
         }
     }
 
     /**
-     * Uploads the payslip to Firebase Storage and returns the download URL.
-     *
-     * @param fileUri  Uri of selected file
-     * @param callback Callback to continue after upload
+     * Uploads payslip to Firebase Storage and calls callback with URL.
      */
-    private void uploadPayslip(Uri fileUri, OnUploadComplete callback) {
+    private void uploadPayslip(Uri uri, OnUploadComplete callback) {
         FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
         if (user == null) return;
 
@@ -148,74 +146,97 @@ public class addIncome extends Fragment {
         StorageReference ref = FirebaseStorage.getInstance()
                 .getReference("incomeFiles/" + uid + "/" + System.currentTimeMillis() + "_payslip.pdf");
 
-        ref.putFile(fileUri)
+        ref.putFile(uri)
                 .addOnSuccessListener(taskSnapshot ->
-                        ref.getDownloadUrl().addOnSuccessListener(uri -> callback.onComplete(uri.toString())))
+                        ref.getDownloadUrl().addOnSuccessListener(downloadUri ->
+                                callback.onComplete(downloadUri.toString())))
                 .addOnFailureListener(e -> {
-                    Toast.makeText(getContext(), "Failed to upload file", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(getContext(), "Upload failed", Toast.LENGTH_SHORT).show();
                     callback.onComplete(null);
                 });
     }
 
     /**
-     * Saves the income data to Firestore and triggers Gemini AI insight generation
-     * upon successful save. Redirects the user to the Dashboard afterward.
+     * Saves income data to Firestore and redirects to Dashboard.
      *
-     * @param userId     Current user UID
-     * @param db         Firestore database instance
-     * @param amount     The income amount entered by the user
-     * @param source     The source of income (e.g. Salary, Freelance)
-     * @param timestamp  The selected date of the income entry
-     * @param note       An optional note for the income entry
-     * @param payslipUrl Optional uploaded payslip URL (nullable)
+     * @param uid         Firebase user ID
+     * @param db          Firestore instance
+     * @param amount      Entered amount
+     * @param source      Income source (e.g., Salary)
+     * @param timestamp   Selected date (used for AI insight triggers)
+     * @param note        Optional user note
+     * @param payslipUrl  Optional uploaded file URL
      */
-    private void saveIncomeData(String userId, FirebaseFirestore db,
-                                double amount, String source, Timestamp timestamp,
+    private void saveIncomeData(String uid, FirebaseFirestore db,
+                                double amount, String source,
+                                Timestamp timestamp,
                                 String note, String payslipUrl) {
 
         Map<String, Object> income = new HashMap<>();
         income.put("amount", amount);
         income.put("source", source);
         income.put("note", note);
-        income.put("timestamp", timestamp);
+        income.put("timestamp", timestamp);   // Used by backend (FCM)
+        income.put("createdAt", timestamp);   // Used by UI for filtering/sorting
         income.put("payslipUrl", payslipUrl);
 
-        db.collection("users")
-                .document(userId)
-                .collection("income")
+        db.collection("users").document(uid).collection("income")
                 .add(income)
-                .addOnSuccessListener(doc -> {
-                    Toast.makeText(getContext(), "Income saved successfully", Toast.LENGTH_SHORT).show();
+                .addOnSuccessListener(docRef -> {
+                    Snackbar.make(requireView(), "Income saved", Snackbar.LENGTH_SHORT).show();
                     resetForm();
-
-                    // Trigger Gemini AI insight generation
-                    new InsightAnalyzer().analyzeAndGenerate(null);
-
-                    // Redirect to Dashboard (Home)
-                    if (getActivity() != null) {
-                        View homeTab = getActivity().findViewById(R.id.nav_home);
-                        if (homeTab != null) {
-                            homeTab.performClick();
-                        } else {
-                            requireActivity().getSupportFragmentManager()
-                                    .beginTransaction()
-                                    .replace(R.id.main_frame, new Dashboard())
-                                    .commit();
-                        }
-                    }
                 })
-                .addOnFailureListener(e ->
-                        Toast.makeText(getContext(), "Failed to save income", Toast.LENGTH_SHORT).show());
+                .addOnFailureListener(e -> Toast.makeText(getContext(), "Save failed", Toast.LENGTH_SHORT).show());
+    }
+
+    /**
+     * Opens file chooser to select a PDF.
+     */
+    private void openFileChooser() {
+        Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
+        intent.setType("application/pdf");
+        startActivityForResult(Intent.createChooser(intent, "Select Payslip"), PICK_PDF_REQUEST);
+    }
+
+    /**
+     * Shows a calendar dialog to choose income date.
+     */
+    private void showDatePicker() {
+        DatePickerDialog dialog = new DatePickerDialog(getContext(), (view, year, month, dayOfMonth) -> {
+            selectedDate.set(Calendar.YEAR, year);
+            selectedDate.set(Calendar.MONTH, month);
+            selectedDate.set(Calendar.DAY_OF_MONTH, dayOfMonth);
+            SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy", Locale.getDefault());
+            inputDate.setText(sdf.format(selectedDate.getTime()));
+        }, selectedDate.get(Calendar.YEAR), selectedDate.get(Calendar.MONTH), selectedDate.get(Calendar.DAY_OF_MONTH));
+        dialog.show();
+    }
+
+    /**
+     * Extracts display name of file from URI.
+     */
+    private String getFileName(Uri uri) {
+        String result = null;
+        if ("content".equals(uri.getScheme())) {
+            try (Cursor cursor = requireActivity().getContentResolver().query(uri, null, null, null, null)) {
+                if (cursor != null && cursor.moveToFirst()) {
+                    int nameIndex = cursor.getColumnIndex(OpenableColumns.DISPLAY_NAME);
+                    if (nameIndex >= 0) result = cursor.getString(nameIndex);
+                }
+            }
+        }
+        if (result == null) result = uri.getLastPathSegment();
+        return result;
     }
 
     @Override
     public void onResume() {
         super.onResume();
-        clearAllFields(); // Reset input + hide keyboard on fragment return
+        clearAllFields();
     }
 
     /**
-     * Clears all input fields, resets state, and hides the keyboard.
+     * Clears all input fields and resets state.
      */
     private void clearAllFields() {
         inputAmount.setText("");
@@ -225,13 +246,11 @@ public class addIncome extends Fragment {
         textFilename.setText("Choose file");
         fileUri = null;
 
-        // Clear focus from inputs
         inputAmount.clearFocus();
         inputCategory.clearFocus();
         inputNote.clearFocus();
         inputDate.clearFocus();
 
-        // Hide keyboard
         View currentFocus = requireActivity().getCurrentFocus();
         if (currentFocus != null) {
             InputMethodManager imm = (InputMethodManager) requireActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
@@ -239,80 +258,15 @@ public class addIncome extends Fragment {
         }
     }
 
-
     /**
-     * Clears the form inputs after successful save.
+     * Wrapper for clearing the form after save.
      */
     private void resetForm() {
-        inputAmount.setText("");
-        inputCategory.setText("");
-        inputNote.setText("");
-        inputDate.setText("");
-        textFilename.setText("Choose file");
-        fileUri = null;
+        clearAllFields();
     }
 
     /**
-     * Opens Android file picker for PDF selection.
-     */
-    private void openFileChooser() {
-        Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
-        intent.setType("application/pdf");
-        startActivityForResult(Intent.createChooser(intent, "Select Payslip"), PICK_PDF_REQUEST);
-    }
-
-    /**
-     * Displays the calendar dialog for date selection.
-     */
-    private void showDatePicker() {
-        DatePickerDialog dialog = new DatePickerDialog(getContext(), (view, year, month, dayOfMonth) -> {
-            selectedDate.set(Calendar.YEAR, year);
-            selectedDate.set(Calendar.MONTH, month);
-            selectedDate.set(Calendar.DAY_OF_MONTH, dayOfMonth);
-
-            SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy", Locale.getDefault());
-            inputDate.setText(sdf.format(selectedDate.getTime()));
-        }, selectedDate.get(Calendar.YEAR), selectedDate.get(Calendar.MONTH), selectedDate.get(Calendar.DAY_OF_MONTH));
-
-        dialog.show();
-    }
-
-    /**
-     * Handles result from file picker and displays file name.
-     */
-    @Override
-    public void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
-        super.onActivityResult(requestCode, resultCode, data);
-
-        if (requestCode == PICK_PDF_REQUEST && resultCode == Activity.RESULT_OK && data != null && data.getData() != null) {
-            fileUri = data.getData();
-            String fileName = getFileName(fileUri);
-            textFilename.setText(fileName != null ? fileName : "File Selected");
-        }
-    }
-
-    /**
-     * Extracts file name from URI for display.
-     */
-    private String getFileName(Uri uri) {
-        String result = null;
-        if ("content".equals(uri.getScheme())) {
-            try (Cursor cursor = getActivity().getContentResolver()
-                    .query(uri, null, null, null, null)) {
-                if (cursor != null && cursor.moveToFirst()) {
-                    int index = cursor.getColumnIndex(OpenableColumns.DISPLAY_NAME);
-                    if (index >= 0) result = cursor.getString(index);
-                }
-            }
-        }
-        if (result == null) {
-            result = uri.getLastPathSegment();
-        }
-        return result;
-    }
-
-    /**
-     * Callback interface to handle post-upload success.
+     * Callback interface for uploading file and returning its URL.
      */
     private interface OnUploadComplete {
         void onComplete(String downloadUrl);

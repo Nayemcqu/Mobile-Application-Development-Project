@@ -1,6 +1,7 @@
 package com.cqu.genaiexpensetracker.notifications;
 
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -18,26 +19,38 @@ import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.Query;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 
 /**
- * Notifications fragment that displays AI-generated Alerts and Advice
- * from Firestore under /users/{uid}/insights/. Supports:
- * - Alert: Title, message, category icon
- * - Advice: Message only
- * - Relative timestamps
+ * Notifications Fragment
+ *
+ * Displays a list of the latest financial insights triggered via Firebase (both Alert and Advice types).
+ * These are shown in descending order of time and limited to the latest 10 insights.
  */
 public class Notifications extends Fragment {
 
+    /** RecyclerView to display list of notifications */
     private RecyclerView recyclerView;
+
+    /** Adapter used for binding notification data */
     private NotificationAdapter adapter;
+
+    /** List holding the fetched notifications */
     private final List<NotificationItem> notificationList = new ArrayList<>();
 
-    public Notifications() {
-        // Required empty public constructor
-    }
+    /** Required empty public constructor */
+    public Notifications() {}
 
+    /**
+     * Called to inflate and initialize the notifications fragment UI.
+     *
+     * @param inflater LayoutInflater used to inflate the layout
+     * @param container ViewGroup container for the fragment
+     * @param savedInstanceState Previously saved state
+     * @return The inflated view for this fragment
+     */
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater,
@@ -50,40 +63,54 @@ public class Notifications extends Fragment {
         adapter = new NotificationAdapter(notificationList);
         recyclerView.setAdapter(adapter);
 
-        loadNotifications();
-
+        loadLatestInsights();
         return view;
     }
 
     /**
-     * Loads all AI insights (alerts and advice) from Firestore
-     * and populates the notifications list.
+     * Loads the most recent 10 insights (Alert and Advice) from Firestore.
+     * These are ordered by timestamp in descending order.
      */
-    private void loadNotifications() {
+    private void loadLatestInsights() {
         String uid = FirebaseAuth.getInstance().getCurrentUser().getUid();
+        FirebaseFirestore db = FirebaseFirestore.getInstance();
 
-        FirebaseFirestore.getInstance()
-                .collection("users")
-                .document(uid)
-                .collection("insights")
+        db.collection("users").document(uid).collection("insights")
+                .whereIn("type", Arrays.asList("Alert", "Advice"))
                 .orderBy("timestamp", Query.Direction.DESCENDING)
+                .limit(10)
                 .get()
-                .addOnSuccessListener(querySnapshot -> {
-                    notificationList.clear();
-
-                    for (DocumentSnapshot doc : querySnapshot) {
-                        String type = doc.getString("type");
-                        String message = doc.getString("message");
-                        String title = doc.getString("title");
-                        String category = doc.getString("category");
-                        Date timestamp = doc.getTimestamp("timestamp") != null
-                                ? doc.getTimestamp("timestamp").toDate()
-                                : new Date(); // fallback
-
-                        notificationList.add(new NotificationItem(type, title, message, category, timestamp));
+                .addOnSuccessListener(snapshot -> {
+                    List<NotificationItem> tempList = new ArrayList<>();
+                    for (DocumentSnapshot doc : snapshot) {
+                        tempList.add(toNotificationItem(doc));
                     }
-
+                    notificationList.clear();
+                    notificationList.addAll(tempList);
                     adapter.notifyDataSetChanged();
-                });
+                })
+                .addOnFailureListener(e -> Log.e("Notifications", "Failed to load insights", e));
+    }
+
+    /**
+     * Converts a Firestore document snapshot to a NotificationItem model.
+     *
+     * @param doc Firestore document snapshot
+     * @return A NotificationItem representing an alert or advice
+     */
+    private NotificationItem toNotificationItem(DocumentSnapshot doc) {
+        String id = doc.getId();
+        String title = doc.getString("title");
+        String message = doc.getString("message");
+        String category = doc.getString("category");
+        String reason = doc.getString("reason");
+        String type = doc.getString("type") != null ? doc.getString("type") : "Alert";
+        boolean isRead = doc.getBoolean("read") != null && doc.getBoolean("read");
+
+        Date timestamp = doc.getTimestamp("timestamp") != null
+                ? doc.getTimestamp("timestamp").toDate()
+                : new Date();
+
+        return new NotificationItem(id, title, message, category, reason, timestamp, isRead, type);
     }
 }

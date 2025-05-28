@@ -156,7 +156,6 @@ public class BarChartView extends View {
         firstRender = false;
     }
 
-
     /**
      * Convert dp to px based on display density.
      */

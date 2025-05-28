@@ -18,10 +18,10 @@
             android:layout_width="0dp"
             android:layout_weight="1"
             android:layout_height="wrap_content"
-            android:text="Advice"
+            android:text="Alerts"
             android:textSize="14sp"
             android:textStyle="bold"
-            android:textColor="#16A34A" />
+            android:textColor="@color/red" />
 
         <TextView
             android:id="@+id/notification_time"
@@ -64,10 +64,21 @@
         android:id="@+id/notification_message"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="You spent 50% more than your weekly average on food."
+        android:text="You spent $120 on food this week."
         android:textSize="12sp"
         android:textColor="#444444"
         android:layout_marginTop="4dp" />
+
+    <!-- Reason -->
+    <TextView
+        android:id="@+id/notification_reason"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Reason goes here"
+        android:textSize="12sp"
+        android:textColor="#888888"
+        android:layout_marginTop="4dp"
+        android:visibility="gone" />
 
     <!-- Divider -->
     <View
