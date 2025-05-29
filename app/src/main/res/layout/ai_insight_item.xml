@@ -1,0 +1,26 @@
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="horizontal"
+    android:paddingVertical="8dp"
+    android:paddingStart="6dp"
+    android:paddingEnd="6dp"
+    android:gravity="center_vertical">
+
+    <ImageView
+        android:id="@+id/insight_icon"
+        android:layout_width="36dp"
+        android:layout_height="36dp"
+        android:layout_marginEnd="12dp"
+        android:contentDescription="Insight Icon" />
+
+    <TextView
+        android:id="@+id/insight_text"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:textSize="14sp"
+        android:lineSpacingExtra="2dp"
+        android:textColor="@color/black"
+        android:fontFamily="@font/montserrat_regular" />
+</LinearLayout>

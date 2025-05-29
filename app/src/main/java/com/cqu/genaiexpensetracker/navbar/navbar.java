@@ -31,7 +31,7 @@ import com.cqu.genaiexpensetracker.expense.Expense;
 import com.cqu.genaiexpensetracker.expense.addExpense;
 import com.cqu.genaiexpensetracker.income.Income;
 import com.cqu.genaiexpensetracker.income.addIncome;
-import com.cqu.genaiexpensetracker.navbar.navbarmenu.insights;
+import com.cqu.genaiexpensetracker.ai_insights.insights;
 import com.cqu.genaiexpensetracker.navbar.navbarmenu.profile;
 import com.google.android.material.navigation.NavigationView;
 import com.google.firebase.auth.FirebaseAuth;
@@ -70,7 +70,7 @@ public class navbar extends AppCompatActivity {
     private final com.cqu.genaiexpensetracker.income.addIncome addIncome = new addIncome();
     private final com.cqu.genaiexpensetracker.expense.addExpense addExpense = new addExpense();
     private final com.cqu.genaiexpensetracker.navbar.navbarmenu.profile profile = new profile();
-    private final com.cqu.genaiexpensetracker.navbar.navbarmenu.insights insights = new insights();
+    private final com.cqu.genaiexpensetracker.ai_insights.insights insights = new insights();
 
     private TextView titleText;
     private DrawerLayout drawerLayout;
@@ -129,10 +129,10 @@ public class navbar extends AppCompatActivity {
                 getSupportFragmentManager().beginTransaction().replace(R.id.main_frame, addExpense).commit();
                 titleText.setText("Add Expense");
             } else if (itemId == R.id.insights_menu) {
-                getSupportFragmentManager().beginTransaction().replace(R.id.main_frame, profile).commit();
+                getSupportFragmentManager().beginTransaction().replace(R.id.main_frame, insights).commit();
                 titleText.setText("AI Insights");
             } else if (itemId == R.id.profile_menu) {
-                getSupportFragmentManager().beginTransaction().replace(R.id.main_frame, insights).commit();
+                getSupportFragmentManager().beginTransaction().replace(R.id.main_frame, profile).commit();
                 titleText.setText("Profile");
             } else if (itemId == R.id.logout_menu) {
                 FirebaseAuth.getInstance().signOut();

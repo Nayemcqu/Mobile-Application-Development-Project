@@ -1,0 +1,136 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/ai_insight_root"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:background="@color/white"
+    android:padding="16dp">
+
+    <!-- Filter Dropdown -->
+    <com.google.android.material.textfield.TextInputLayout
+        android:id="@+id/dropdown_filter_layout"
+        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.ExposedDropdownMenu"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="12dp"
+        android:layout_marginTop="2dp"
+        android:hint="Filter"
+        app:endIconMode="dropdown_menu">
+
+        <AutoCompleteTextView
+            android:id="@+id/filter_dropdown"
+            android:layout_width="150dp"
+            android:layout_height="wrap_content"
+            android:text="Weekly"
+            android:inputType="none"
+            android:focusable="false"
+            android:background="@null"
+            android:fontFamily="@font/montserrat_regular"
+            android:textColor="@color/black"
+            android:textSize="14sp" />
+    </com.google.android.material.textfield.TextInputLayout>
+
+    <!-- Summary Cards -->
+    <LinearLayout
+        android:id="@+id/summary_cards_container"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:layout_marginTop="16dp"
+        android:weightSum="3">
+
+        <include
+            layout="@layout/card_ai_income"
+            android:layout_width="0dp"
+            android:layout_height="100dp"
+            android:layout_weight="1"
+            android:layout_marginEnd="12dp" />
+
+        <include
+            layout="@layout/card_ai_expense"
+            android:layout_width="0dp"
+            android:layout_height="100dp"
+            android:layout_weight="1"
+            android:layout_marginEnd="12dp" />
+
+        <include
+            layout="@layout/card_ai_saving"
+            android:layout_width="0dp"
+            android:layout_height="100dp"
+            android:layout_weight="1" />
+    </LinearLayout>
+
+    <!-- Generate Button -->
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/button_generate_insights"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:text="Generate AI Insights"
+        android:textColor="@android:color/white"
+        android:background="@drawable/generate_ai_button_bg"
+        android:paddingVertical="14dp"
+        android:textSize="16sp"
+        android:textStyle="bold"
+        android:fontFamily="@font/montserrat_semibold"
+        app:backgroundTint="@null" />
+
+    <!-- AI Insights Container -->
+    <LinearLayout
+        android:id="@+id/insight_container"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:orientation="vertical"
+        android:background="@drawable/bg_insight_card"
+        android:padding="16dp"
+        android:elevation="1dp"
+        android:layout_marginTop="20dp"
+        android:clipToOutline="true">
+
+        <!-- Heading -->
+        <TextView
+            android:id="@+id/insight_heading"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Smart Financial Insights"
+            android:fontFamily="@font/montserrat_regular"
+            android:textColor="@color/black"
+            android:textSize="16sp"
+            android:textStyle="bold"
+            android:layout_marginBottom="12dp" />
+
+        <!-- Scrollable Insights List Only -->
+        <ScrollView
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            android:overScrollMode="ifContentScrolls"
+            android:fillViewport="true">
+
+            <LinearLayout
+                android:id="@+id/insight_items_container"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:dividerPadding="8dp"
+                android:layout_marginBottom="8dp" />
+        </ScrollView>
+    </LinearLayout>
+
+    <!-- PDF Button -->
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/btn_download_report"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="12dp"
+        android:text="Download Report (PDF)"
+        android:textColor="@android:color/black"
+        android:background="@drawable/download_report_button_bg"
+        android:paddingVertical="14dp"
+        android:textSize="16sp"
+        android:fontFamily="@font/montserrat_semibold"
+        app:backgroundTint="@null" />
+</LinearLayout>

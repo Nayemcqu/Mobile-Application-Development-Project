@@ -1,0 +1,54 @@
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="@drawable/ai_bg_card"
+    android:layout_weight="1"
+    android:layout_marginEnd="8dp"
+    android:padding="12dp">
+
+    <!-- Inner vertical content -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:gravity="left">
+
+        <TextView
+            android:id="@+id/summary_income_title"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Income"
+            android:layout_marginTop="4dp"
+            android:fontFamily="@font/montserrat_regular"
+            android:textSize="14sp"
+            android:textStyle="bold"
+            android:textColor="@color/black" />
+
+        <TextView
+            android:id="@+id/summary_income_amount"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="$0.00"
+            android:textSize="14sp"
+            android:fontFamily="@font/arial_regular"
+            android:textColor="@color/black"
+            android:layout_marginTop="4dp" />
+    </LinearLayout>
+
+    <!-- Badge: bottom-end -->
+    <TextView
+        android:id="@+id/summary_income_count"
+        android:layout_width="35dp"
+        android:layout_height="24dp"
+        android:minWidth="24dp"
+        android:paddingStart="8dp"
+        android:paddingEnd="8dp"
+        android:text="0"
+        android:background="@drawable/ai_income_card_badge_bg"
+        android:textColor="@android:color/white"
+        android:textSize="12sp"
+        android:fontFamily="@font/montserrat_regular"
+        android:gravity="center"
+        android:layout_gravity="bottom|end"/>
+
+</FrameLayout>

@@ -1,0 +1,49 @@
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="55dp"
+    android:layout_marginStart="16dp"
+    android:background="?android:selectableItemBackground"
+    android:clickable="true"
+    android:gravity="center_vertical"
+    android:orientation="horizontal"
+    android:paddingHorizontal="16dp"
+    android:paddingVertical="16dp">
+
+    <!-- Colored Dot -->
+    <View
+        android:id="@+id/color_dot"
+        android:layout_width="10dp"
+        android:layout_height="10dp"
+        android:layout_gravity="center_vertical"
+        android:layout_marginEnd="10dp"
+        android:background="@drawable/dot_green" />
+
+    <!-- Label -->
+    <TextView
+        android:id="@+id/label_text"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:fontFamily="@font/arial_regular"
+        android:text="Income"
+        android:textColor="@color/black"
+        android:textSize="14sp" />
+
+    <!-- Value -->
+    <TextView
+        android:id="@+id/value_text"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="12dp"
+        android:fontFamily="@font/arial_regular"
+        android:text="$500"
+        android:textColor="#545454"
+        android:textSize="16sp" />
+
+    <!-- Arrow Icon -->
+    <ImageView
+        android:id="@+id/arrow_icon"
+        android:layout_width="35dp"
+        android:layout_height="35dp"
+        android:src="@drawable/ic_arrow_icon_overviewtab" />
+</LinearLayout>

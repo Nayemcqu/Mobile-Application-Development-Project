@@ -23,7 +23,7 @@
                                 <PersistentState>
                                   <option name="values">
                                     <map>
-                                      <entry key="url" value="jar:file:/C:/Users/kawpe/AppData/Local/Programs/Android%20Studio/plugins/android/lib/android.jar!/images/material/icons/materialicons/category/baseline_category_24.xml" />
+                                      <entry key="url" value="jar:file:/C:/Users/kawpe/AppData/Local/Programs/Android%20Studio/plugins/android/lib/android.jar!/images/material/icons/materialicons/keyboard_arrow_down/baseline_keyboard_arrow_down_24.xml" />
                                     </map>
                                   </option>
                                 </PersistentState>
@@ -34,7 +34,7 @@
                         <option name="values">
                           <map>
                             <entry key="color" value="151414" />
-                            <entry key="outputName" value="ic_category_general" />
+                            <entry key="outputName" value="ai_dropdown_icon" />
                             <entry key="sourceFile" value="C:\Users\kawpe\Downloads\ic_home_icon.svg" />
                           </map>
                         </option>

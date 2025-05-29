@@ -194,7 +194,7 @@ public class Overview extends Fragment {
      * Reusable helper to inflate and bind a single row.
      */
     private void addSummaryRow(LayoutInflater inflater, String label, double amount, int dotDrawable) {
-        View row = inflater.inflate(R.layout.item_summary, summaryList, false);
+        View row = inflater.inflate(R.layout.income_expense_saving_item_summary, summaryList, false);
 
         TextView labelText = row.findViewById(R.id.label_text);
         TextView valueText = row.findViewById(R.id.value_text);
