@@ -26,6 +26,15 @@
     <string name="Password_Visibility">Password visibility toggle</string>
     <string name="hello_blank_fragment">Hello blank fragment</string>
 
+    <!-- Insights.java usuable string -->
+
+    <string name="generating">Generating...</string>
+    <string name="generate_ai_insights">Generate AI Insights</string>
+    <string name="creating_report">Creating report...</string>
+    <string name="pdf_success">PDF generated successfully.</string>
+    <string name="pdf_failed">PDF generation failed: %1$s</string>
+
+
     <!-- Forgot Password -->
     <string name="forgot_password">Forgot Password</string>
     <string name="forgot_password_details">Provide your registered email to reset your password.</string>
@@ -83,6 +92,52 @@
         <item>Food</item>
         <item>Transport</item>
     </string-array>
+
+
+    <!-- Privacy Policy content is here -->
+
+    <string name="privacy_policy_text">
+    <![CDATA[
+    <b>1. Introduction</b><br/>
+    GenAI Expense Tracker is committed to protecting your privacy. This Privacy Policy outlines how your data is collected, used, and safeguarded when you use the app.<br/><br/>
+
+    <b>2. Data Collection</b><br/>
+    We collect the following data when you use the application:<br/>
+    • <b>Email address</b> – used for authentication via Firebase Authentication.<br/>
+    • <b>Income and expense entries</b> – stored securely in Firestore to track your financial activity.<br/>
+    • <b>Profile photo</b> – optionally uploaded by you for personalization.<br/><br/>
+
+    <b>3. Data Usage</b><br/>
+    The data collected is used strictly for the following purposes:<br/>
+    • To visualize your income and expense trends.<br/>
+    • To generate financial insights via AI (Gemini API).<br/>
+    • To produce downloadable financial reports in PDF format.<br/><br/>
+
+    <b>4. Data Sharing</b><br/>
+    Your personal data is <b>never sold or shared</b> with third-party marketers. Data may only be shared:<br/>
+    • With Firebase services (as part of secure cloud storage).<br/>
+    • As required by law (e.g., in response to lawful requests).<br/><br/>
+
+    <b>5. Storage and Security</b><br/>
+    • All data is stored in Google Firebase Cloud Firestore.<br/>
+    • Reports are uploaded to Firebase Storage securely.<br/>
+    • Communication with Firebase is protected using HTTPS encryption.<br/><br/>
+
+    <b>6. Your Rights</b><br/>
+    You have full control over your data:<br/>
+    • You may request deletion of your account and associated data.<br/>
+    • You can update or modify your entries anytime.<br/>
+    • You may sign out or uninstall the app to stop data collection.<br/><br/>
+
+    <b>7. Consent</b><br/>
+    By using this app, you consent to this Privacy Policy and agree to the collection and use of your data as described.<br/><br/>
+
+    <b>8. Contact</b><br/>
+    For any privacy-related concerns or data deletion requests, please contact us at:<br/>
+    <i>kawpeelpandey@gmail.com</i><br/>
+    ]]>
+</string>
+
 
 
 </resources>

@@ -431,7 +431,7 @@ public class SignIn extends AppCompatActivity {
         hideLoader();
         Dialog successDialog = new Dialog(this);
         successDialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
-        successDialog.setContentView(R.layout.dialog_login_success);
+        successDialog.setContentView(R.layout.dialog_success);
         successDialog.setCancelable(false);
 
         if (successDialog.getWindow() != null) {

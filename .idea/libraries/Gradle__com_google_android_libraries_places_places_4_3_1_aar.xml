@@ -1,0 +1,13 @@
+<component name="libraryTable">
+  <library name="Gradle: com.google.android.libraries.places:places:4.3.1@aar" external-system-id="GRADLE">
+    <CLASSES>
+      <root url="jar://$USER_HOME$/.gradle/caches/8.11.1/transforms/2418894c94f86d4c90bd4e4a7dcba7a4/transformed/places-4.3.1/jars/classes.jar!/" />
+      <root url="file://$USER_HOME$/.gradle/caches/8.11.1/transforms/2418894c94f86d4c90bd4e4a7dcba7a4/transformed/places-4.3.1/res" />
+      <root url="file://$USER_HOME$/.gradle/caches/8.11.1/transforms/2418894c94f86d4c90bd4e4a7dcba7a4/transformed/places-4.3.1/AndroidManifest.xml" />
+    </CLASSES>
+    <JAVADOC>
+      <root url="jar://$USER_HOME$/.gradle/caches/modules-2/files-2.1/com.google.android.libraries.places/places/4.3.1/2c23b49bc2c71ee383163e0e86a4ac251211c57d/places-4.3.1-javadoc.jar!/" />
+    </JAVADOC>
+    <SOURCES />
+  </library>
+</component>

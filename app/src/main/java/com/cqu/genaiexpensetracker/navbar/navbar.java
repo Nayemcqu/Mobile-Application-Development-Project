@@ -18,6 +18,7 @@ import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.ContextCompat;
 import androidx.core.graphics.Insets;
+import androidx.core.view.GravityCompat;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
@@ -32,7 +33,8 @@ import com.cqu.genaiexpensetracker.expense.addExpense;
 import com.cqu.genaiexpensetracker.income.Income;
 import com.cqu.genaiexpensetracker.income.addIncome;
 import com.cqu.genaiexpensetracker.ai_insights.insights;
-import com.cqu.genaiexpensetracker.navbar.navbarmenu.profile;
+import com.cqu.genaiexpensetracker.profile.profile;
+import com.cqu.genaiexpensetracker.privacy_policy.PrivacyPolicy;
 import com.google.android.material.navigation.NavigationView;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
@@ -69,7 +71,7 @@ public class navbar extends AppCompatActivity {
     private final Overview overview = new Overview();
     private final com.cqu.genaiexpensetracker.income.addIncome addIncome = new addIncome();
     private final com.cqu.genaiexpensetracker.expense.addExpense addExpense = new addExpense();
-    private final com.cqu.genaiexpensetracker.navbar.navbarmenu.profile profile = new profile();
+    private final com.cqu.genaiexpensetracker.profile.profile profile = new profile();
     private final com.cqu.genaiexpensetracker.ai_insights.insights insights = new insights();
 
     private TextView titleText;
@@ -134,7 +136,21 @@ public class navbar extends AppCompatActivity {
             } else if (itemId == R.id.profile_menu) {
                 getSupportFragmentManager().beginTransaction().replace(R.id.main_frame, profile).commit();
                 titleText.setText("Profile");
-            } else if (itemId == R.id.logout_menu) {
+            } else if (itemId == R.id.privacy_policy_menu) {
+                getSupportFragmentManager().beginTransaction().replace(R.id.main_frame, new PrivacyPolicy()).commit();
+                titleText.setText("Privacy Policy");
+            } else if (itemId == R.id.share_menu) {
+                Intent shareIntent = new Intent(Intent.ACTION_SEND);
+                shareIntent.setType("text/plain");
+                shareIntent.putExtra(Intent.EXTRA_SUBJECT, "GenAI Expense Tracker");
+                shareIntent.putExtra(Intent.EXTRA_TEXT,
+                        "Check out GenAI Expense Tracker – a smart way to manage your money!\n\n" +
+                                "https://play.google.com/store/apps/details?id=com.cqu.genaiexpensetracker");
+
+                startActivity(Intent.createChooser(shareIntent, "Share via"));
+                drawerLayout.closeDrawer(GravityCompat.START);
+            }
+            else if (itemId == R.id.logout_menu) {
                 FirebaseAuth.getInstance().signOut();
                 Intent intent = new Intent(navbar.this, SignIn.class);
                 intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);

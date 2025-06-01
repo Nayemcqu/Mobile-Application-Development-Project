@@ -2,7 +2,6 @@ package com.cqu.genaiexpensetracker.dashboard;
 
 import android.graphics.Color;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -105,7 +104,7 @@ public class Dashboard extends Fragment {
             totalBalanceText.setText(String.format(Locale.getDefault(), balance < 0 ? "-$%.2f" : "$%.2f", Math.abs(balance)));
             totalBalanceText.setTextColor(
                     balance < 0
-                            ? ContextCompat.getColor(requireContext(), R.color.negative_balance)
+                            ? ContextCompat.getColor(requireContext(), R.color.saving)
                             : Color.WHITE
             );
         });

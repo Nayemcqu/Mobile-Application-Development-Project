@@ -16,7 +16,7 @@ android {
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
 
-        // ✅ Fix for Vector Drawable icons
+        // for Vector Drawable icons
         vectorDrawables {
             useSupportLibrary = true
         }
@@ -51,12 +51,17 @@ dependencies {
     implementation libs.lottie
     implementation 'com.github.PhilJay:MPAndroidChart:v3.1.0'
     implementation libs.glide
+    implementation libs.places
     annotationProcessor libs.glide.compiler
     implementation 'com.google.firebase:firebase-messaging:23.4.1'
+    implementation 'de.hdodenhof:circleimageview:3.1.0'
+    implementation 'com.google.firebase:firebase-config:21.6.1'
+    implementation 'com.hbb20:ccp:2.6.1'
 
     implementation libs.retrofit
     implementation("com.squareup.retrofit2:converter-gson:3.0.0")
     implementation libs.okhttp
+    implementation(libs.itextpdf)
 
     testImplementation libs.junit
     androidTestImplementation libs.ext.junit

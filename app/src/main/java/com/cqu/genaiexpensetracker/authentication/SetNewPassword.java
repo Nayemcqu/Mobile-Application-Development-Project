@@ -188,7 +188,7 @@ public class SetNewPassword extends AppCompatActivity {
     private void showPasswordResetSuccessDialog() {
         Dialog dialog = new Dialog(this);
         dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
-        dialog.setContentView(R.layout.dialog_login_success);
+        dialog.setContentView(R.layout.dialog_success);
         dialog.setCancelable(false);
 
         if (dialog.getWindow() != null) {

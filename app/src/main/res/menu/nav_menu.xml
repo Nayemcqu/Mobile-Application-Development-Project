@@ -29,7 +29,7 @@
         android:title="Share" />
 
     <item
-        android:id="@+id/privacy_menu"
+        android:id="@+id/privacy_policy_menu"
         android:icon="@drawable/ic_privacy_icon"
         android:title="Privacy Policy" />
 

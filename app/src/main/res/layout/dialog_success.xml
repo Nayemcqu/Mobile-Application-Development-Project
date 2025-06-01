@@ -5,13 +5,12 @@
     android:layout_height="wrap_content"
     android:orientation="vertical"
     android:gravity="center"
-    android:padding="24dp"
-    android:background="@drawable/loader_dialog_bg">
+    android:padding="24dp">
 
     <com.airbnb.lottie.LottieAnimationView
         android:id="@+id/success_lottie"
-        android:layout_width="150dp"
-        android:layout_height="150dp"
+        android:layout_width="170dp"
+        android:layout_height="170dp"
         app:lottie_fileName="login_success.json"
         app:lottie_autoPlay="true"
         app:lottie_loop="false" />
@@ -21,10 +20,9 @@
         android:layout_height="wrap_content"
         android:id="@+id/success_message_text"
         android:text="Sign In Successful!"
-
         android:fontFamily="@font/montserrat_bold"
         android:textSize="18sp"
         android:textStyle="bold"
-        android:textColor="#4CAF50"
-        android:layout_marginTop="16dp"/>
+        android:textColor="@color/white"
+        android:layout_marginTop="12dp"/>
 </LinearLayout>
